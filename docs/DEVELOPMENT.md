@@ -38,8 +38,9 @@ openssl req -x509 -newkey rsa:2048 -nodes -keyout key.pem -out cert.pem -days 36
   -addext "keyUsage=critical,digitalSignature" -addext "extendedKeyUsage=critical,codeSigning" -addext "basicConstraints=critical,CA:false"
 openssl pkcs12 -export -legacy -inkey key.pem -in cert.pem -name "MacCompose Signing" -out MacCompose-signing.p12
 security import MacCompose-signing.p12 -k ~/Library/Keychains/login.keychain-db -T /usr/bin/codesign
-base64 -i MacCompose-signing.p12 | gh secret set SIGNING_CERT_P12
-gh secret set SIGNING_CERT_PASSWORD
+base64 -i MacCompose-signing.p12 | pbcopy
 ```
+
+Then, in the repository's Settings > Secrets and variables > Actions, add the repository secret `SIGNING_CERT_P12` and paste the clipboard as its value, then add `SIGNING_CERT_PASSWORD` with the `.p12` password.
 
 `security find-identity -p codesigning` lists it as `CSSMERR_TP_NOT_TRUSTED`; that is expected and does not prevent signing.
