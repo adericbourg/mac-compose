@@ -36,12 +36,6 @@ Not a bug: `include "%L"` in `~/.XCompose` is ignored on purpose. The bundled ru
 - **Where:** `Sources/MacCompose/KeyTap.swift` (`ComposeKey`), `Sources/MacComposeCore/ComposeKeyDetector.swift`.
 - **Fix:** Caps Lock sends `flagsChanged` with a toggled state, not a press and release. Detect the toggle, then reset the state. Alternatively, document remapping Caps Lock to Right Control in System Settings.
 
-### 8. `~/.XCompose` syntax gaps (S each)
-
-- **Problem:** rules using octal or hex escapes (`"\101"`), modifier lines (`~Ctrl`, `!`) or `$XCOMPOSEFILE` are skipped silently.
-- **Where:** `Sources/MacComposeCore/ComposeFile.swift` (`parseQuoted` has the `shortcut:` comment, `parseRule`, `loadDefaultComposeSequences`).
-- **Fix:** add `\NNN` and `\xHH` in `parseQuoted`. Skip `$XCOMPOSEFILE`: an app started from Finder does not get shell variables. Keep skipping modifier lines, but log them.
-
 ### 9. Output is chunked at 20 UTF-16 units (S)
 
 - **Problem:** the limit is observed, not documented. A macOS update could change it and truncate long emoji sequences.

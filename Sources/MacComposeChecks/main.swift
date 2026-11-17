@@ -48,6 +48,9 @@ let rules = fixture("rules", #"""
 # comment
 <Multi_key> <q> <q> : "\"" quotedbl
 <Multi_key> <b> <b> : "\\" backslash
+<Multi_key> <o> <o> : "\101\x42\1013"
+<Multi_key> <h> <h> : "\x4a\xe9"
+~Ctrl <Multi_key> <m> <m> : "modifier"
 <Multi_key> <U2192> <x> : "x→"
 <Multi_key> <k> <s> : eacute
 <Multi_key> <!> < > : "bang"
@@ -62,11 +65,12 @@ let parsed = loadComposeSequences(from: [rules, fixtureDirectory.appending(path:
 // Then each rule maps as expected, ignored lines are dropped and the missing file is skipped
 check("parse_ofQuotedEscape_returnsQuote", parsed[["q", "q"]] == "\"")
 check("parse_ofBackslashEscape_returnsBackslash", parsed[["b", "b"]] == "\\")
+check("parse_ofOctalAndHexEscapes_returnsCharacters", parsed[["o", "o"]] == "ABA3" && parsed[["h", "h"]] == "Jé")
 check("parse_ofUnicodeName_returnsCharacter", parsed[["→", "x"]] == "x→")
 check("parse_ofKeysymOutput_returnsKeysymCharacter", parsed[["k", "s"]] == "é")
 check("parse_ofLiteralNames_returnsOutput", parsed[["!", " "]] == "bang")
 check("parse_ofDoubleMultiKey_usesComposeKeyCharacter", parsed[[composeKeyCharacter, "e"]] == "😀")
-check("parse_ofNonMultiKeyAndUnresolvableAndMalformed_ignoresThem", parsed.count == 6)
+check("parse_ofNonMultiKeyAndUnresolvableAndMalformed_ignoresThem", parsed.count == 8)
 
 // Given a later file overriding a rule and conflicting by prefix with two others
 let base = fixture("base", """

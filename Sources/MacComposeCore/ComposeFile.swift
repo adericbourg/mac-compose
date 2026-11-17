@@ -63,6 +63,8 @@ private func load(_ url: URL, into root: TrieNode, depth: Int) {
             }
         } else if let (sequence, output) = parseRule(Substring(line)) {
             root.insert(sequence, output)
+        } else if !line.hasPrefix("#"), !line.hasPrefix("<"), line.contains("<Multi_key>") {
+            NSLog("MacCompose: skipped rule with modifiers (not supported): %@", line)
         }
     }
 }
@@ -112,16 +114,21 @@ private func parseRule(_ line: Substring) -> ([Character], String)? {
     return (sequence, output)
 }
 
-// shortcut: a backslash escapes the next character only (`\"`, `\\`, all the bundled files use); add octal/hex escapes if a user file needs them.
+/// Escapes: `\"`, `\\`, octal `\NNN` (1-3 digits) and hex `\xHH` (1-2 digits). Xlib stores a byte there; values above 0x7F are read as the Unicode scalar of the same value (Latin-1).
 private func parseQuoted(_ text: Substring) -> String? {
     var output = ""
-    var isEscaped = false
-    for character in text {
-        if isEscaped {
-            output.append(character)
-            isEscaped = false
-        } else if character == "\\" {
-            isEscaped = true
+    var rest = text
+    while let character = rest.popFirst() {
+        if character == "\\", let escaped = rest.popFirst() {
+            let isHex = escaped == "x"
+            let digits = (isHex ? rest : Substring([escaped] + rest)).prefix(isHex ? 2 : 3)
+                .prefix(while: { isHex ? $0.isHexDigit : ("0"..."7").contains($0) })
+            if let value = UInt32(digits, radix: isHex ? 16 : 8), let scalar = Unicode.Scalar(value) {
+                output.append(Character(scalar))
+                rest = rest.dropFirst(isHex ? digits.count : digits.count - 1)
+            } else {
+                output.append(escaped)
+            }
         } else if character == "\"" {
             return output
         } else {
