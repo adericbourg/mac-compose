@@ -11,7 +11,7 @@ import SwiftUI
         if let window {
             window.contentViewController = controller
         } else {
-            let window = NSWindow(contentViewController: controller)
+            let window = EscClosableWindow(contentViewController: controller)
             window.title = "Compose sequences"
             window.setContentSize(NSSize(width: 640, height: 480))
             window.isReleasedWhenClosed = false
@@ -21,6 +21,11 @@ import SwiftUI
         NSApp.activate()
         window?.makeKeyAndOrderFront(nil)
     }
+}
+
+/// A plain NSWindow ignores Esc; close on it like a panel does.
+private final class EscClosableWindow: NSWindow {
+    override func cancelOperation(_ sender: Any?) { performClose(sender) }
 }
 
 // Not `@State`: its macro plugin ships with Xcode only, and the build uses Command Line Tools.
