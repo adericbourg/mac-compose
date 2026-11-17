@@ -183,6 +183,10 @@ check("feed_ofDoubleComposeRule_emitsRightAway", ([composeKeyCharacter] + Array(
 // When free text gets longer than any name, Then it gives up
 let runaway = ([composeKeyCharacter] + Array(repeating: "x", count: 100)).map { engine.feed($0) }
 check("feed_ofRunawayFreeText_isInvalid", runaway.contains(.invalid))
+// When Backspace is typed in free text, Then it removes the last character, and never the leading Compose
+let afterBackspace = ([composeKeyCharacter] + Array("wxy\u{7F}\u{7F}\u{7F}\u{7F}\u{7F}wink\r")).map { engine.feed($0) }
+check("feed_ofBackspaceInFreeText_removesLastCharacter",
+      afterBackspace.dropLast().allSatisfy { $0 == .pending } && afterBackspace.last == .emit("😉"))
 
 // ComposeKeyDetector
 // Given a detector on Right Option (61)

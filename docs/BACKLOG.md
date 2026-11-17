@@ -78,11 +78,6 @@ Not a bug: `include "%L"` in `~/.XCompose` is ignored on purpose. The bundled ru
 - **Where:** `Casks/` in `adericbourg/homebrew-tap`.
 - **Fix:** run the Release workflow once.
 
-### 13. No Backspace while typing an emoji name (S)
-
-- **Problem:** after Compose, Compose, Backspace becomes part of the name, so the search usually fails. Typos are tolerated, but the user can't fix one.
-- **Where:** `Sources/MacComposeCore/ComposeEngine.swift` (`feed`).
-- **Fix:** in free text, remove the last character of the buffer on `\u{7F}` instead of appending it.
 
 ## Missing features
 

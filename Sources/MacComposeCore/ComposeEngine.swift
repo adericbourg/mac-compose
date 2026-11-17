@@ -31,6 +31,11 @@ public struct ComposeEngine: Sendable {
             return .pending
         }
         if buffer.first == composeKeyCharacter, buffer.count <= maxFreeTextLength + 1 {
+            if character == "\u{7F}" {
+                buffer.removeLast()
+                if buffer.count > 1 { buffer.removeLast() }
+                return .pending
+            }
             guard character == "\r" || character == "\t" else {
                 return .pending
             }
