@@ -6,8 +6,8 @@ import SwiftUI
 @MainActor final class SequencesWindow {
     private var window: NSWindow?
 
-    func show(_ sequences: [[Character]: String]) {
-        let controller = NSHostingController(rootView: SequencesView(entries: sequenceEntries(sequences)))
+    func show(_ sequences: [[Character]: String], emoji: [EmojiName]) {
+        let controller = NSHostingController(rootView: SequencesView(entries: sequenceEntries(sequences) + sequenceEntries(emoji)))
         if let window {
             window.contentViewController = controller
         } else {
@@ -39,7 +39,7 @@ private struct SequencesView: View {
                 TableColumn("Result", value: \.output).width(min: 50, ideal: 60, max: 120)
                 TableColumn("Name", value: \.name)
             }
-            Text("⎄ is the Compose key, ␣ is Space. Search by result, name or keys.")
+            Text("⎄ is the Compose key, ␣ is Space, ⏎ is Return. Search by result, name or keys.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .padding([.horizontal, .bottom])

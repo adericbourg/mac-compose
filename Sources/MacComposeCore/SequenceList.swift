@@ -22,6 +22,11 @@ public func sequenceEntries(_ sequences: [[Character]: String]) -> [SequenceEntr
     }.sorted { $0.keys < $1.keys }
 }
 
+/// Emoji typed by name: `⎄ ⎄ winking face ⏎`.
+public func sequenceEntries(_ names: [EmojiName]) -> [SequenceEntry] {
+    names.map { SequenceEntry(keys: "⎄ ⎄ \($0.name) ⏎", output: $0.emoji, name: $0.name, typedKeys: $0.name) }
+}
+
 extension SequenceEntry {
     /// Case-insensitive search in the output, the name and the typed keys; an empty query matches everything.
     public func matches(_ query: String) -> Bool {

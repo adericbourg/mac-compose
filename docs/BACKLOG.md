@@ -2,7 +2,7 @@
 
 Known limits and missing features, ordered by user impact. Sizes: S (under a day), M (a few days), L (a week or more).
 
-Not a bug: `include "%L"` in `~/.XCompose` is ignored on purpose. The bundled rules are always loaded first, and reloading them would undo `WinCompose.txt` and `Emoji.txt`.
+Not a bug: `include "%L"` in `~/.XCompose` is ignored on purpose. The bundled rules are always loaded first, and reloading them would undo `WinCompose.txt`.
 
 ## Limits
 
@@ -78,6 +78,18 @@ Not a bug: `include "%L"` in `~/.XCompose` is ignored on purpose. The bundled ru
 - **Where:** `Casks/` in `adericbourg/homebrew-tap`.
 - **Fix:** run the Release workflow once.
 
+### 13. Emoji are found by their Unicode name only (S)
+
+- **Problem:** common short names find nothing or the wrong emoji: `100` (named "hundred points"), `ok`, `tada` (gives 🎋, not 🎉), `+1`.
+- **Where:** `Sources/MacComposeCore/EmojiSearch.swift` (`loadEmojiNames`, `bestEmoji`).
+- **Fix:** bundle a keyword list, for example gemoji (MIT) or the CLDR annotations, add it to `NOTICE`, and search the keywords along with the names.
+
+### 14. No Backspace while typing an emoji name (S)
+
+- **Problem:** after Compose, Compose, Backspace becomes part of the name, so the search usually fails. Typos are tolerated, but the user can't fix one.
+- **Where:** `Sources/MacComposeCore/ComposeEngine.swift` (`feed`).
+- **Fix:** in free text, remove the last character of the buffer on `\u{7F}` instead of appending it.
+
 ## Missing features
 
 Compared with WinCompose.
@@ -90,7 +102,7 @@ Compared with WinCompose.
 
 ### 2. No feedback of the sequence being typed (M)
 
-- **Problem:** the user cannot see what was typed so far. Only the menu bar icon changes.
+- **Problem:** the user cannot see what was typed so far. Only the menu bar icon changes. Emoji names make this worse: the result of a fuzzy match is only seen once it's typed.
 - **Where:** `Sources/MacCompose/KeyTap.swift` (`feed`), `Sources/MacCompose/main.swift` (status item).
 - **Fix:** show the typed keys as the menu bar item title, for example `' …`. A floating window near the caret is larger and needs more permissions.
 

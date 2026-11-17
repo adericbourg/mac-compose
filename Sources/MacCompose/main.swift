@@ -87,7 +87,7 @@ private let isHoldEnabledKey = "isHoldEnabled"
     }
 
     @objc private func showSequences() {
-        sequencesWindow.show(keyTap.sequences)
+        sequencesWindow.show(keyTap.sequences, emoji: keyTap.emoji)
     }
 
     private func updateItems() {

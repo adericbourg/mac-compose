@@ -92,20 +92,47 @@ check("load_ofIncludeL_keepsUserRule", included[["o", "o"]] == "custom")
 
 // Given the bundled files, When loading them, Then the well-known sequences are present
 let start = Date()
-let bundled = loadComposeSequences(from: ["Compose", "WinCompose.txt", "Emoji.txt"].compactMap(bundledResource))
+let bundled = loadComposeSequences(from: ["Compose", "WinCompose.txt"].compactMap(bundledResource))
 print("Loaded \(bundled.count) bundled sequences in \(Int(Date().timeIntervalSince(start) * 1000)) ms")
-check("load_ofBundledFiles_returnsMoreThan3000Sequences", bundled.count > 3000)
+check("load_ofBundledFiles_returnsMoreThan2500Sequences", bundled.count > 2500)
 check("load_ofBundledFiles_composesEAcute", bundled[["'", "e"]] == "é")
 check("load_ofBundledFiles_composesArrow", bundled[["-", ">"]] == "→")
 check("load_ofBundledFiles_composesDegree", bundled[["o", "o"]] == "°")
-check("load_ofBundledFiles_composesEmoji", bundled[[composeKeyCharacter] + Array("winking")] == "😉")
+check("load_ofBundledFiles_composesDoubleComposeRule", bundled[[composeKeyCharacter] + Array("bzh")] != nil)
+check("loadDefaultComposeSequences_leavesEmojiToFuzzySearch", loadDefaultComposeSequences()[[composeKeyCharacter] + Array("winking")] == nil)
+
+// Given an emoji file with an active and a commented-out line
+let emojiFixture = fixture("emoji", """
+<Multi_key> <Multi_key> <w> <i> <n> <k> <i> <n> <g> : "😉" U1F609 # winking face
+# "#️⃣" U0023 UFE0F U20E3 # keycap: #
+not an emoji line
+""")
+// When loading its names, Then both lines are kept, in order, with their full name
+let fixtureNames = loadEmojiNames(from: emojiFixture)
+check("loadEmojiNames_ofActiveAndCommentedLines_returnsBoth",
+      fixtureNames.map(\.emoji) == ["😉", "#️⃣"] && fixtureNames.map(\.name) == ["winking face", "keycap: #"])
+
+// Given the bundled emoji names
+let emojiNames = loadDefaultEmojiNames()
+check("loadDefaultEmojiNames_returnsAllEmojiLines", emojiNames.count > 3000)
+// When searching, Then prefixes, typos, full names and later words find the closest, shortest name
+check("bestEmoji_ofPrefixTypoFullNameOrUppercase_returnsWinking",
+      ["wink", "wniking", "winking face", "WINK", " wink "].allSatisfy { bestEmoji(for: $0, in: emojiNames) == "😉" })
+check("bestEmoji_ofFormerlyCommentedOutName_returnsIt", bestEmoji(for: "winking face with tongue", in: emojiNames) == "😜")
+check("bestEmoji_ofLaterWord_prefersShorterName", bestEmoji(for: "joy", in: emojiNames) == "😂")
+check("bestEmoji_ofNothingClose_returnsNil", bestEmoji(for: "xqzz", in: emojiNames) == nil)
+check("bestEmoji_ofShortQuery_allowsNoTypo", bestEmoji(for: "wni", in: emojiNames) == nil)
 
 // Given the bundled sequences, When listing them for display
-let entries = sequenceEntries(bundled)
+let entries = sequenceEntries(bundled.merging([[composeKeyCharacter] + Array("winking"): "😉"]) { $1 })
 let winking = entries.first { $0.output == "😉" }
 // Then the Compose key and spaces are visible and the emoji has its Unicode name
 check("sequenceEntries_ofDoubleComposeEmoji_showsComposeSymbolAndName",
       winking?.keys == "⎄ ⎄ w i n k i n g" && winking?.name == "winking face")
+// When listing the emoji names for display, Then they show the name followed by Return
+let emojiEntries = sequenceEntries(emojiNames)
+check("sequenceEntries_ofEmojiNames_showsNameThenReturn",
+      emojiEntries.first { $0.output == "😜" }?.keys == "⎄ ⎄ winking face with tongue ⏎" && emojiEntries.count == emojiNames.count)
 check("sequenceEntries_ofSpaceKey_showsVisibleSpace", sequenceEntries([[" ", " "]: "x"]).first?.keys == "⎄ ␣ ␣")
 check("sequenceEntries_isSortedByKeys", entries.map(\.keys) == entries.map(\.keys).sorted())
 // When searching, Then the name, the keys, the output match case-insensitively, and nothing else
@@ -114,7 +141,7 @@ check("matches_ofNameKeysOrOutput_findsEntry",
 check("matches_ofKeysWithoutSeparators_findsEntry", entries.first { $0.output == "é" && $0.matches("'e") } != nil)
 
 // Given an engine on the bundled sequences
-var engine = ComposeEngine(sequences: bundled)
+var engine = ComposeEngine(sequences: bundled, emoji: emojiNames)
 // When feeding a valid prefix, then completing it
 let pending = engine.feed("'")
 let emitted = engine.feed("e")
@@ -131,11 +158,20 @@ _ = engine.feed("'")
 engine.reset()
 // Then the abandoned prefix is forgotten
 check("reset_forgetsBuffer_thenEmits", engine.feed("o") == .pending && engine.feed("o") == .emit("°"))
-// When feeding the second Compose press (the first one started composing) then the emoji name
+// When feeding the second Compose press (the first one started composing), a misspelled emoji name, then Return
 var emojiResults = [engine.feed(composeKeyCharacter)]
-emojiResults += "winking".map { engine.feed($0) }
-// Then everything is pending until the last character emits
-check("feed_ofDoubleComposeEmoji_emits", emojiResults.dropLast().allSatisfy { $0 == .pending } && emojiResults.last == .emit("😉"))
+emojiResults += "wniking\r".map { engine.feed($0) }
+// Then everything is pending until Return emits the closest emoji
+check("feed_ofDoubleComposeFreeText_emitsOnReturn", emojiResults.dropLast().allSatisfy { $0 == .pending } && emojiResults.last == .emit("😉"))
+// When ending free text with Tab, Then it emits too
+check("feed_ofDoubleComposeFreeText_emitsOnTab", ([composeKeyCharacter] + Array("joy\t")).map { engine.feed($0) }.last == .emit("😂"))
+// When nothing is close, Then Return is invalid
+check("feed_ofDoubleComposeUnknownName_isInvalid", ([composeKeyCharacter] + Array("xqzz\r")).map { engine.feed($0) }.last == .invalid)
+// When typing an exact double Compose rule, Then it still emits right away
+check("feed_ofDoubleComposeRule_emitsRightAway", ([composeKeyCharacter] + Array("bzh")).map { engine.feed($0) }.last.map { $0 != .pending && $0 != .invalid } == true)
+// When free text gets longer than any name, Then it gives up
+let runaway = ([composeKeyCharacter] + Array(repeating: "x", count: 100)).map { engine.feed($0) }
+check("feed_ofRunawayFreeText_isInvalid", runaway.contains(.invalid))
 
 // ComposeKeyDetector
 // Given a detector on Right Option (61)

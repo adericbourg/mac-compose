@@ -46,9 +46,9 @@ xattr -d com.apple.quarantine /Applications/MacCompose.app
 | `' e` | é |
 | `- >` | → |
 | `o o` | ° |
-| Compose, Compose, then `winking` | 😉 |
+| Compose, Compose, then `wink` and Return | 😉 |
 
-Emoji are Compose, Compose, then the emoji's English name, as in the table above. To find any sequence, pick "Show sequences…" in the menu and search by result (`é`), name (`arrow`) or keys (`'e`). The list includes your `~/.XCompose` rules.
+Emoji are Compose, Compose, then the emoji's English name or the start of any word in it, then Return or Tab: `wink`, `winking face` or even `wniking` all give 😉, and `joy` gives 😂. Typos are allowed in longer names. If several emoji match, the shortest name wins. If nothing is close, it beeps. To find any sequence, pick "Show sequences…" in the menu and search by result (`é`), name (`arrow`) or keys (`'e`). The list includes your `~/.XCompose` rules.
 
 Escape cancels. A sequence that doesn't exist beeps and is dropped. Holding the Compose key with another key still works as a normal modifier, unless "Compose while held" is on: the Compose key then no longer works as a modifier at all. For example, with Right Option as the Compose key, it no longer types Option characters or does Option+arrow; with Right Command, it no longer triggers shortcuts. Its left twin keeps working.
 

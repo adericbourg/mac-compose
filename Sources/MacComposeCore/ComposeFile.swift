@@ -3,9 +3,9 @@ import Foundation
 /// Stands for a Compose key press inside a sequence (WinCompose's `<Multi_key> <Multi_key> ...` emoji sequences).
 public let composeKeyCharacter: Character = "\u{E000}"
 
-/// Bundled Xorg Compose, WinCompose.txt, Emoji.txt, then the user's `~/.XCompose`.
+/// Bundled Xorg Compose, WinCompose.txt, then the user's `~/.XCompose`. Emoji.txt is searched by name instead (`loadDefaultEmojiNames`).
 public func loadDefaultComposeSequences() -> [[Character]: String] {
-    let bundled = ["Compose", "WinCompose.txt", "Emoji.txt"].compactMap(bundledResource)
+    let bundled = ["Compose", "WinCompose.txt"].compactMap(bundledResource)
     return loadComposeSequences(from: bundled + [FileManager.default.homeDirectoryForCurrentUser.appending(path: ".XCompose")])
 }
 
@@ -69,7 +69,7 @@ private func load(_ url: URL, into root: TrieNode, depth: Int) {
 
 private func includeURL(_ line: String) -> URL? {
     let parts = line.split(separator: "\"")
-    // %L is skipped: the bundled Compose is always loaded first, and reloading it would undo WinCompose.txt and Emoji.txt.
+    // %L is skipped: the bundled Compose is always loaded first, and reloading it would undo WinCompose.txt.
     guard parts.count >= 2, !parts[1].contains("%S"), !parts[1].contains("%L") else {
         return nil
     }
