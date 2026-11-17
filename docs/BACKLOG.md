@@ -52,9 +52,3 @@ Not a bug: `include "%L"` in `~/.XCompose` is ignored on purpose. The bundled ru
 ## Missing features
 
 Compared with WinCompose.
-
-### 2. No feedback of the sequence being typed (M)
-
-- **Problem:** the user cannot see what was typed so far. Only the menu bar icon changes. Emoji names make this worse: the result of a fuzzy match is only seen once it's typed.
-- **Where:** `Sources/MacCompose/KeyTap.swift` (`feed`), `Sources/MacCompose/main.swift` (status item).
-- **Fix:** show the typed keys as the menu bar item title, for example `' …`. A floating window near the caret is larger and needs more permissions.

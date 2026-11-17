@@ -62,6 +62,8 @@ private let composingTimeout: TimeInterval = 5
         }
     }
     var onComposingChanged: (Bool) -> Void = { _ in }
+    /// The engine's buffer, reported after every feed and reset.
+    var onTypedChanged: ([Character]) -> Void = { _ in }
 
     private var isComposing = false {
         didSet {
@@ -178,7 +180,9 @@ private let composingTimeout: TimeInterval = 5
     }
 
     private func feed(_ character: Character) {
-        switch engine.feed(character) {
+        let result = engine.feed(character)
+        onTypedChanged(engine.typed)
+        switch result {
         case .pending:
             restartTimeout()
         case .emit(let text):
@@ -199,6 +203,7 @@ private let composingTimeout: TimeInterval = 5
 
     private func cancel() {
         engine.reset()
+        onTypedChanged([])
         isComposing = false
     }
 

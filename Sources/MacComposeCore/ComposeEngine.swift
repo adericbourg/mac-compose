@@ -13,6 +13,8 @@ public struct ComposeEngine: Sendable {
     /// Free text longer than any emoji name gives up, so a forgotten Compose doesn't keep swallowing keys.
     private let maxFreeTextLength: Int
     private var buffer: [Character] = []
+    /// The characters fed so far in the current sequence, Compose presses included.
+    public var typed: [Character] { buffer }
 
     public init(sequences: [[Character]: String], emoji: [EmojiName]) {
         self.sequences = sequences

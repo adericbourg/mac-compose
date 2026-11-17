@@ -1,5 +1,6 @@
 import AppKit
 @preconcurrency import ApplicationServices
+import MacComposeCore
 
 private let isEnabledKey = "isEnabled"
 private let composeKeyKey = "composeKey"
@@ -57,6 +58,7 @@ private let isHoldEnabledKey = "isHoldEnabled"
         statusItem.menu = menu
 
         keyTap.onComposingChanged = { [weak self] isComposing in self?.updateIcon(isComposing: isComposing) }
+        keyTap.onTypedChanged = { [weak self] typed in self?.updateTitle(typed) }
         updateIcon(isComposing: false)
         updateItems()
     }
@@ -105,6 +107,14 @@ private let isHoldEnabledKey = "isHoldEnabled"
         for item in composeKeyItems {
             item.state = item.tag == Int(keyTap.composeKey.rawValue) ? .on : .off
         }
+    }
+
+    /// Shows the sequence typed so far next to the icon; idle is icon only, square as before.
+    private func updateTitle(_ typed: [Character]) {
+        let text = String(typed.map { $0 == composeKeyCharacter ? "⎄" : $0 })
+        statusItem.length = text.isEmpty ? NSStatusItem.squareLength : NSStatusItem.variableLength
+        statusItem.button?.title = text.isEmpty ? "" : " " + text + "…"
+        statusItem.button?.setAccessibilityLabel(text.isEmpty ? "MacCompose" : "MacCompose, composing: \(text)")
     }
 
     private func updateIcon(isComposing: Bool) {

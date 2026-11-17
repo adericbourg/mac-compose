@@ -200,6 +200,14 @@ let afterBackspace = ([composeKeyCharacter] + Array("wxy\u{7F}\u{7F}\u{7F}\u{7F}
 check("feed_ofBackspaceInFreeText_removesLastCharacter",
       afterBackspace.dropLast().allSatisfy { $0 == .pending } && afterBackspace.last == .emit("😉"))
 
+// Given a partial free text, Then `typed` mirrors the engine's buffer, Backspace included, and is empty after emitting
+engine.reset()
+_ = ([composeKeyCharacter] + Array("wix\u{7F}")).map { engine.feed($0) }
+check("typed_afterBackspaceInFreeText_dropsLastCharacter", engine.typed == [composeKeyCharacter, "w", "i"])
+_ = "\r".map { engine.feed($0) }
+engine.reset()
+check("typed_afterReset_isEmpty", engine.typed.isEmpty)
+
 // ComposeKeyDetector
 // Given a detector on Right Option (61)
 var detector = ComposeKeyDetector(keyCode: 61)

@@ -38,7 +38,7 @@ xattr -d com.apple.quarantine /Applications/MacCompose.app
 
 ## Use
 
-1. Tap the Compose key alone, without holding it with another key. The default is Right Option. The menu bar icon changes while you compose. With "Compose while held" on, you can also keep it held while typing the sequence.
+1. Tap the Compose key alone, without holding it with another key. The default is Right Option. The menu bar icon changes while you compose, and the keys typed so far appear next to it (`⎄` stands for a Compose press). With "Compose while held" on, you can also keep it held while typing the sequence.
 2. Type the sequence, one key at a time.
 
 | Keys | Result |
