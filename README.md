@@ -77,10 +77,17 @@ Then pick "Reload sequences" in the menu.
 
 The Xorg `en_US.UTF-8` Compose rules, plus the [WinCompose](https://github.com/samhocevar/wincompose) rules and emoji. Sources and licenses are in [NOTICE](Sources/MacComposeCore/Resources/NOTICE).
 
-## Known limitations
+## Known limits
 
-- Sequences with dead keys or keypad keys are not supported, and are skipped when loading.
+- Sequences with dead keys (`dead_*`) or keypad keys (`KP_*`) are skipped when loading: 529 of the Xorg rules.
+- `~/.XCompose`: octal and hex escapes in quoted output are not supported, modifier lines (`~Ctrl`, `!`) are skipped, and `$XCOMPOSEFILE` is not read.
+- The Compose key is Right Option, Right Command or Right Control. Caps Lock is not possible.
+- A dead key pressed while composing is swallowed and types nothing.
+- A mouse click does not cancel composing. Press Escape.
+- If you revoke the Accessibility permission while the app runs, the menu does not warn you.
 - Apple silicon only, macOS 27.2 or later.
+
+Each limit, with the planned fix and the missing features (launch at login, on-screen feedback, timeout), is in the [backlog](docs/BACKLOG.md).
 
 ## Uninstall
 
@@ -91,6 +98,7 @@ brew uninstall --cask mac-compose
 ## More
 
 - [Development](docs/DEVELOPMENT.md): build from source and release
+- [Backlog](docs/BACKLOG.md): known limits and missing features
 
 ## License
 
