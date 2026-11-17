@@ -24,12 +24,6 @@ Not a bug: `include "%L"` in `~/.XCompose` is ignored on purpose. The bundled ru
 - **Where:** `Sources/MacCompose/KeyTap.swift`, `Sources/MacComposeChecks/main.swift`.
 - **Fix:** run the manual list under "Verification" in the plan `i-am-missing-a-cuddly-wren.md` before each release, and record it in `docs/DEVELOPMENT.md`.
 
-### 7. Caps Lock cannot be the Compose key (M)
-
-- **Problem:** WinCompose and many Linux users use Caps Lock. Only Right Option, Right Command and Right Control are offered.
-- **Where:** `Sources/MacCompose/KeyTap.swift` (`ComposeKey`), `Sources/MacComposeCore/ComposeKeyDetector.swift`.
-- **Fix:** Caps Lock sends `flagsChanged` with a toggled state, not a press and release. Detect the toggle, then reset the state. Alternatively, document remapping Caps Lock to Right Control in System Settings.
-
 ### 9. Output is chunked at 20 UTF-16 units (S)
 
 - **Problem:** the limit is observed, not documented. A macOS update could change it and truncate long emoji sequences.

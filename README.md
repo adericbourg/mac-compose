@@ -65,6 +65,51 @@ The menu bar menu has:
 | Version | The version and commit you are running. Include them when you report a bug |
 | Quit | Quits the app |
 
+## Use Caps Lock as the Compose key
+
+Remap Caps Lock to Right Control, then pick "Right Control" in the menu. A remapped Caps Lock no longer toggles caps.
+
+Do not use System Settings → Keyboard → Modifier Keys → "Caps Lock → Control". It produces Left Control, which the app does not offer.
+
+1. Remap the key:
+
+```sh
+hidutil property --set '{"UserKeyMapping":[{"HIDKeyboardModifierMappingSrc":0x700000039,"HIDKeyboardModifierMappingDst":0x7000000E4}]}'
+```
+
+2. Pick "Compose key" → "Right Control" in the menu.
+
+The mapping is lost at reboot. To restore it at each login, save this as `~/Library/LaunchAgents/<reverse-dns>.capslock-compose.plist`, for example `com.example.capslock-compose.plist`. It takes effect at the next login:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.example.capslock-compose</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/bin/hidutil</string>
+        <string>property</string>
+        <string>--set</string>
+        <string>{"UserKeyMapping":[{"HIDKeyboardModifierMappingSrc":0x700000039,"HIDKeyboardModifierMappingDst":0x7000000E4}]}</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+</dict>
+</plist>
+```
+
+To undo, clear the mapping and delete the plist:
+
+```sh
+hidutil property --set '{"UserKeyMapping":[]}'
+rm ~/Library/LaunchAgents/<reverse-dns>.capslock-compose.plist
+```
+
+The `hidutil` commands were tested; the LaunchAgent was not. `hidutil` replaces every mapping you set, so merge this one into any existing `UserKeyMapping`.
+
 ## Custom sequences
 
 Add rules to `~/.XCompose`, in the X11 format:
@@ -86,7 +131,7 @@ The Xorg `en_US.UTF-8` Compose rules, plus the [WinCompose](https://github.com/s
 
 - Sequences with dead keys (`dead_*`) or keypad keys (`KP_*`) are skipped when loading: 529 of the Xorg rules.
 - `~/.XCompose`: octal and hex escapes in quoted output are not supported, modifier lines (`~Ctrl`, `!`) are skipped, and `$XCOMPOSEFILE` is not read.
-- The Compose key is Right Option, Right Command or Right Control. Caps Lock is not possible.
+- The Compose key is Right Option, Right Command or Right Control. To use Caps Lock, [remap it to Right Control](#use-caps-lock-as-the-compose-key).
 - A dead key pressed while composing is swallowed and types nothing.
 - A mouse click does not cancel composing. Press Escape.
 - If you revoke the Accessibility permission while the app runs, the menu does not warn you.
