@@ -7,24 +7,6 @@ Not a bug: `include "%L"` in `~/.XCompose` is ignored on purpose. The bundled ru
 ## Limits
 
 
-### 5. Output typed with virtual key 0 may break in some apps (S to verify, M to fix)
-
-- **Problem:** an app that reads the key code instead of the event string would type `a`. Terminals are to verify.
-- **Where:** `Sources/MacCompose/KeyTap.swift` (`type`).
-- **Fix:** test in Terminal, iTerm2, a VM and a remote desktop client. If one fails, choose a fallback then.
-
-### 6. The event tap and typing path is not tested end to end (M)
-
-- **Problem:** it needs the Accessibility permission, so no automated check covers it. Regressions are found by users.
-- **Where:** `Sources/MacCompose/KeyTap.swift`, `Sources/MacComposeChecks/main.swift`.
-- **Fix:** run the manual list under "Verification" in the plan `i-am-missing-a-cuddly-wren.md` before each release, and record it in `docs/DEVELOPMENT.md`.
-
-### 9. Output is chunked at 20 UTF-16 units (S)
-
-- **Problem:** the limit is observed, not documented. A macOS update could change it and truncate long emoji sequences.
-- **Where:** `Sources/MacCompose/KeyTap.swift` (`type`).
-- **Fix:** add a check that types a 40-unit string in a text field, and run it on each new macOS version.
-
 ### 10. kragen's dotXCompose rules are not bundled (S)
 
 - **Problem:** WinCompose ships them, so some of its sequences are missing here.
