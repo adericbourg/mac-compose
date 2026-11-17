@@ -6,11 +6,6 @@ Not a bug: `include "%L"` in `~/.XCompose` is ignored on purpose. The bundled ru
 
 ## Limits
 
-### 2. Dead keys pressed while composing type nothing (M)
-
-- **Problem:** on layouts with dead keys (French, Spanish...), pressing one while composing is swallowed. The user sees no reaction.
-- **Where:** `Sources/MacCompose/KeyTap.swift` (`handle`, `.keyDown` case: `characters` is empty for a dead key).
-- **Fix:** depends on item 1, and on knowing which `dead_*` a key is (it varies by layout). Check feasibility first.
 
 ### 5. Output typed with virtual key 0 may break in some apps (S to verify, M to fix)
 

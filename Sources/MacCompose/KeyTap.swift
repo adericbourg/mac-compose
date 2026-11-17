@@ -1,4 +1,5 @@
 import AppKit
+import Carbon
 import MacComposeCore
 
 enum ComposeKey: Int64, CaseIterable {
@@ -161,11 +162,11 @@ private let composingTimeout: TimeInterval = 5
                 cancel()
                 return true
             }
-            // Empty for a dead key: nothing to feed, the next key brings the character.
             let nsEvent = NSEvent(cgEvent: event)
             // The held Compose key must not alter the character (Right Option + ' is ', not æ).
-            let characters = isComposeKeyHeld ? nsEvent?.charactersIgnoringModifiers : nsEvent?.characters
-            for character in characters ?? "" {
+            var characters = (isComposeKeyHeld ? nsEvent?.charactersIgnoringModifiers : nsEvent?.characters) ?? ""
+            if characters.isEmpty { characters = deadKeyCharacters(keyCode: keyCode, flags: flags) }
+            for character in characters {
                 feed(character)
                 if !isComposing { break }
             }
@@ -226,4 +227,25 @@ private let composingTimeout: TimeInterval = 5
             }
         }
     }
+}
+
+/// What a dead key types on its own in the current layout (^ for the French circumflex key), as `dead_*` rules expect.
+private func deadKeyCharacters(keyCode: Int64, flags: CGEventFlags) -> String {
+    guard let source = TISCopyCurrentKeyboardLayoutInputSource()?.takeRetainedValue(),
+          let data = TISGetInputSourceProperty(source, kTISPropertyUnicodeKeyLayoutData) else { return "" }
+    let layout = Unmanaged<CFData>.fromOpaque(data).takeUnretainedValue() as Data
+    var modifiers = 0
+    if flags.contains(.maskShift) { modifiers |= shiftKey }
+    if flags.contains(.maskAlternate) { modifiers |= optionKey }
+    if flags.contains(.maskAlphaShift) { modifiers |= alphaLock }
+    var deadKeyState: UInt32 = 0
+    var length = 0
+    var units = [UniChar](repeating: 0, count: 4)
+    layout.withUnsafeBytes { bytes in
+        _ = UCKeyTranslate(bytes.baseAddress!.assumingMemoryBound(to: UCKeyboardLayout.self), UInt16(keyCode),
+                           UInt16(kUCKeyActionDown), UInt32(modifiers >> 8) & 0xFF, UInt32(LMGetKbdType()),
+                           OptionBits(kUCKeyTranslateNoDeadKeysMask), &deadKeyState, units.count, &length, &units)
+    }
+    // US layouts give the modifier letters ˆ and ˜, which start no rule; the rules use ^ and ~.
+    return String(utf16CodeUnits: units, count: length).replacing("ˆ", with: "^").replacing("˜", with: "~")
 }
