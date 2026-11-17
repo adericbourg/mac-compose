@@ -11,6 +11,7 @@ private let isHoldEnabledKey = "isHoldEnabled"
     private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
     private let enabledItem = NSMenuItem(title: "Enabled", action: #selector(toggleEnabled), keyEquivalent: "")
     private let holdItem = NSMenuItem(title: "Compose while held", action: #selector(toggleHold), keyEquivalent: "")
+    private let loginItem = NSMenuItem(title: "Launch at login", action: #selector(toggleLogin), keyEquivalent: "")
     private let permissionItem = NSMenuItem(title: "Accessibility permission needed", action: nil, keyEquivalent: "")
     private var composeKeyItems: [NSMenuItem] = []
     private let sequencesWindow = SequencesWindow()
@@ -37,6 +38,8 @@ private let isHoldEnabledKey = "isHoldEnabled"
         menu.addItem(composeKeyItem)
         holdItem.target = self
         menu.addItem(holdItem)
+        loginItem.target = self
+        menu.addItem(loginItem)
         let reloadItem = NSMenuItem(title: "Reload sequences", action: #selector(reloadSequences), keyEquivalent: "")
         reloadItem.target = self
         menu.addItem(reloadItem)
@@ -75,6 +78,11 @@ private let isHoldEnabledKey = "isHoldEnabled"
         updateItems()
     }
 
+    @objc private func toggleLogin() {
+        LoginItem.set(!LoginItem.isEnabled)
+        updateItems()
+    }
+
     @objc private func selectComposeKey(_ sender: NSMenuItem) {
         guard let key = ComposeKey(rawValue: Int64(sender.tag)) else { return }
         keyTap.composeKey = key
@@ -93,6 +101,7 @@ private let isHoldEnabledKey = "isHoldEnabled"
     private func updateItems() {
         enabledItem.state = keyTap.isEnabled ? .on : .off
         holdItem.state = keyTap.isHoldEnabled ? .on : .off
+        loginItem.state = LoginItem.isEnabled ? .on : .off
         for item in composeKeyItems {
             item.state = item.tag == Int(keyTap.composeKey.rawValue) ? .on : .off
         }
@@ -116,6 +125,7 @@ UserDefaults.standard.register(defaults: [isEnabledKey: true, composeKeyKey: Com
 let keyTap = KeyTap(composeKey: ComposeKey(rawValue: Int64(UserDefaults.standard.integer(forKey: composeKeyKey))) ?? .rightOption)
 keyTap.isEnabled = UserDefaults.standard.bool(forKey: isEnabledKey)
 keyTap.isHoldEnabled = UserDefaults.standard.bool(forKey: isHoldEnabledKey)
+LoginItem.registerOnce()
 let statusMenu = StatusMenu(keyTap: keyTap)
 
 _ = AXIsProcessTrustedWithOptions([kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary)

@@ -59,6 +59,7 @@ The menu bar menu has:
 | Enabled | Turns composing on or off |
 | Compose key | Right Option (default), Right Command or Right Control |
 | Compose while held | Holding the Compose key while typing composes too, like on Linux. Off by default |
+| Launch at login | Starts the app when you log in. Turned on the first time the app runs; untick it to keep it off. Only works from the app bundle |
 | Reload sequences | Reads `~/.XCompose` again |
 | Show sequences… | Lists every sequence, with a search field |
 | Version | The version and commit you are running. Include them when you report a bug |
@@ -91,7 +92,7 @@ The Xorg `en_US.UTF-8` Compose rules, plus the [WinCompose](https://github.com/s
 - If you revoke the Accessibility permission while the app runs, the menu does not warn you.
 - Apple silicon only, macOS 27.2 or later.
 
-Each limit, with the planned fix and the missing features (launch at login, on-screen feedback, timeout), is in the [backlog](docs/BACKLOG.md).
+Each limit, with the planned fix and the missing features (on-screen feedback, timeout), is in the [backlog](docs/BACKLOG.md).
 
 ## Uninstall
 

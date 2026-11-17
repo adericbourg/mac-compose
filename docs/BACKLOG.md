@@ -88,12 +88,6 @@ Not a bug: `include "%L"` in `~/.XCompose` is ignored on purpose. The bundled ru
 
 Compared with WinCompose.
 
-### 1. Launch at login (S)
-
-- **Problem:** the user starts the app by hand after each reboot.
-- **Where:** new file in `Sources/MacCompose/`, menu item in `Sources/MacCompose/main.swift`.
-- **Fix:** reuse the `LoginItem` enum of ionized-bar (`SMAppService.mainApp`, `Sources/IonizedBar/LoginItem.swift`) and add a "Launch at login" menu item. Skip its register-once default unless wanted.
-
 ### 2. No feedback of the sequence being typed (M)
 
 - **Problem:** the user cannot see what was typed so far. Only the menu bar icon changes. Emoji names make this worse: the result of a fuzzy match is only seen once it's typed.
