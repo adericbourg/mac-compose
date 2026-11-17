@@ -1,0 +1,104 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version part to increase
+        type: choice
+        options: [patch, minor, major]
+        default: minor
+
+# Two runs at once would compute the same version
+concurrency: release
+
+jobs:
+  release:
+    # A manual run from another branch would release unmerged code
+    if: github.ref == 'refs/heads/main'
+    runs-on: xcode-27
+    permissions:
+      contents: write
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_27.2.app/Contents/Developer
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: swift run MacComposeChecks
+      - name: Increase the version
+        id: version
+        env:
+          BUMP: ${{ inputs.bump }}
+        run: |
+          version=$(./scripts/bump-version.sh "$BUMP")
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+      - name: Import the signing certificate
+        env:
+          SIGNING_CERT_P12: ${{ secrets.SIGNING_CERT_P12 }}
+          SIGNING_CERT_PASSWORD: ${{ secrets.SIGNING_CERT_PASSWORD }}
+        run: |
+          keychain="$RUNNER_TEMP/signing.keychain-db"
+          keychain_password=$(openssl rand -base64 24)
+          echo "$SIGNING_CERT_P12" | base64 --decode > "$RUNNER_TEMP/signing.p12"
+          security create-keychain -p "$keychain_password" "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$keychain_password" "$keychain"
+          security import "$RUNNER_TEMP/signing.p12" -k "$keychain" -P "$SIGNING_CERT_PASSWORD" -T /usr/bin/codesign
+          rm "$RUNNER_TEMP/signing.p12"
+          # Lets codesign use the key without a UI prompt
+          security set-key-partition-list -S apple-tool:,apple: -k "$keychain_password" "$keychain" >/dev/null
+          security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
+      - run: ./scripts/archive.sh
+      - name: Refuse an ad-hoc build, which would lose the users' grants
+        run: codesign -dr - build/MacCompose.app 2>&1 | grep -q 'certificate leaf'
+      - name: Delete the signing keychain and certificate
+        if: always()
+        run: |
+          rm -f "$RUNNER_TEMP/signing.p12"
+          security delete-keychain "$RUNNER_TEMP/signing.keychain-db" 2>/dev/null || true
+      # Only once the build passed, so a failed run leaves the version unchanged. Fails if main moved meanwhile, and then takes the release back
+      - name: Commit the version and release it
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: release $TAG" Support/Info.plist
+          git tag "$TAG"
+          # The tag carries the commit to the remote, so the release can be made before main moves
+          git push origin "refs/tags/$TAG"
+          # With no release yet, the delete fails and only the tag is left to remove
+          trap 'gh release delete "$TAG" --cleanup-tag --yes || git push origin ":refs/tags/$TAG"' ERR
+          gh release create "$TAG" build/MacCompose-*.zip --verify-tag --title "$TAG" --generate-notes
+          # Last, as the one step that can't be undone
+          git push origin HEAD:main
+
+  cask:
+    needs: release
+    runs-on: ubuntu-slim
+    permissions:
+      contents: read
+    env:
+      TAG: ${{ needs.release.outputs.tag }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: adericbourg/homebrew-tap
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+      - name: Point the cask at the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern 'MacCompose-*.zip' --dir "$RUNNER_TEMP"
+          sha=$(sha256sum "$RUNNER_TEMP"/MacCompose-*.zip | cut -d' ' -f1)
+          sed -i -E "s/^  version \".*\"/  version \"${TAG#v}\"/; s/^  sha256 \"[^\"]*\"/  sha256 \"$sha\"/" Casks/mac-compose.rb
+          # Fails when the cask already holds this version and checksum
+          ! git diff --quiet Casks/mac-compose.rb
+      - name: Push to the tap
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "Brew cask update for mac-compose version $TAG"
+          git push
