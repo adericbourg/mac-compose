@@ -3,12 +3,14 @@ import AppKit
 
 private let isEnabledKey = "isEnabled"
 private let composeKeyKey = "composeKey"
+private let isHoldEnabledKey = "isHoldEnabled"
 
 /// The menu bar item and its menu; owns the settings.
 @MainActor final class StatusMenu: NSObject {
     private let keyTap: KeyTap
     private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
     private let enabledItem = NSMenuItem(title: "Enabled", action: #selector(toggleEnabled), keyEquivalent: "")
+    private let holdItem = NSMenuItem(title: "Compose while held", action: #selector(toggleHold), keyEquivalent: "")
     private let permissionItem = NSMenuItem(title: "Accessibility permission needed", action: nil, keyEquivalent: "")
     private var composeKeyItems: [NSMenuItem] = []
 
@@ -32,6 +34,8 @@ private let composeKeyKey = "composeKey"
         let composeKeyItem = NSMenuItem(title: "Compose key", action: nil, keyEquivalent: "")
         composeKeyItem.submenu = composeKeyMenu
         menu.addItem(composeKeyItem)
+        holdItem.target = self
+        menu.addItem(holdItem)
         let reloadItem = NSMenuItem(title: "Reload sequences", action: #selector(reloadSequences), keyEquivalent: "")
         reloadItem.target = self
         menu.addItem(reloadItem)
@@ -61,6 +65,12 @@ private let composeKeyKey = "composeKey"
         updateIcon(isComposing: false)
     }
 
+    @objc private func toggleHold() {
+        keyTap.isHoldEnabled.toggle()
+        UserDefaults.standard.set(keyTap.isHoldEnabled, forKey: isHoldEnabledKey)
+        updateItems()
+    }
+
     @objc private func selectComposeKey(_ sender: NSMenuItem) {
         guard let key = ComposeKey(rawValue: Int64(sender.tag)) else { return }
         keyTap.composeKey = key
@@ -74,6 +84,7 @@ private let composeKeyKey = "composeKey"
 
     private func updateItems() {
         enabledItem.state = keyTap.isEnabled ? .on : .off
+        holdItem.state = keyTap.isHoldEnabled ? .on : .off
         for item in composeKeyItems {
             item.state = item.tag == Int(keyTap.composeKey.rawValue) ? .on : .off
         }
@@ -92,10 +103,11 @@ private let composeKeyKey = "composeKey"
 
 // What LSUIElement does in the bundle, for a bare `swift run` binary.
 NSApplication.shared.setActivationPolicy(.accessory)
-UserDefaults.standard.register(defaults: [isEnabledKey: true, composeKeyKey: ComposeKey.rightOption.rawValue])
+UserDefaults.standard.register(defaults: [isEnabledKey: true, composeKeyKey: ComposeKey.rightOption.rawValue, isHoldEnabledKey: false])
 
 let keyTap = KeyTap(composeKey: ComposeKey(rawValue: Int64(UserDefaults.standard.integer(forKey: composeKeyKey))) ?? .rightOption)
 keyTap.isEnabled = UserDefaults.standard.bool(forKey: isEnabledKey)
+keyTap.isHoldEnabled = UserDefaults.standard.bool(forKey: isHoldEnabledKey)
 let statusMenu = StatusMenu(keyTap: keyTap)
 
 _ = AXIsProcessTrustedWithOptions([kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary)

@@ -38,7 +38,7 @@ xattr -d com.apple.quarantine /Applications/MacCompose.app
 
 ## Use
 
-1. Tap the Compose key alone, without holding it with another key. The default is Right Option. The menu bar icon changes while you compose.
+1. Tap the Compose key alone, without holding it with another key. The default is Right Option. The menu bar icon changes while you compose. With "Compose while held" on, you can also keep it held while typing the sequence.
 2. Type the sequence, one key at a time.
 
 | Keys | Result |
@@ -48,7 +48,7 @@ xattr -d com.apple.quarantine /Applications/MacCompose.app
 | `o o` | ° |
 | Compose, Compose, then `winking` | 😉 |
 
-Escape cancels. A sequence that doesn't exist beeps and is dropped. Holding the Compose key with another key still works as a normal modifier.
+Escape cancels. A sequence that doesn't exist beeps and is dropped. Holding the Compose key with another key still works as a normal modifier, unless "Compose while held" is on: the Compose key then no longer works as a modifier at all. For example, with Right Option as the Compose key, it no longer types Option characters or does Option+arrow; with Right Command, it no longer triggers shortcuts. Its left twin keeps working.
 
 The menu bar menu has:
 
@@ -56,6 +56,7 @@ The menu bar menu has:
 |---|---|
 | Enabled | Turns composing on or off |
 | Compose key | Right Option (default), Right Command or Right Control |
+| Compose while held | Holding the Compose key while typing composes too, like on Linux. Off by default |
 | Reload sequences | Reads `~/.XCompose` again |
 | Version | The version and commit you are running. Include them when you report a bug |
 | Quit | Quits the app |

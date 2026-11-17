@@ -20,6 +20,23 @@ enum ComposeKey: Int64, CaseIterable {
         case .rightControl: 0x2000
         }
     }
+
+    /// The device flag of the left twin, which keeps working as a modifier while this key is held.
+    var leftDeviceFlag: UInt64 {
+        switch self {
+        case .rightOption: 0x20
+        case .rightCommand: 0x08
+        case .rightControl: 0x01
+        }
+    }
+
+    var modifierMask: CGEventFlags {
+        switch self {
+        case .rightOption: .maskAlternate
+        case .rightCommand: .maskCommand
+        case .rightControl: .maskControl
+        }
+    }
 }
 
 /// Marks the events this app posts, so its own tap lets them through.
@@ -30,6 +47,10 @@ private let escapeKeyCode: Int64 = 53
 /// and the composed text is typed in their place.
 @MainActor final class KeyTap {
     var isEnabled = true {
+        didSet { cancel() }
+    }
+    /// Holding the Compose key while typing starts composing too; that key then no longer acts as a modifier.
+    var isHoldEnabled = false {
         didSet { cancel() }
     }
     var composeKey: ComposeKey {
@@ -98,9 +119,13 @@ private let escapeKeyCode: Int64 = 53
         case .keyDown:
             detector.otherInputPressed()
             swallowedKeyCodes.remove(keyCode)
+            let isComposeKeyHeld = isHoldEnabled && event.flags.rawValue & composeKey.deviceFlag != 0
+            if isComposeKeyHeld { isComposing = true }
             guard isComposing else { return false }
+            var flags = event.flags
+            if isComposeKeyHeld && flags.rawValue & composeKey.leftDeviceFlag == 0 { flags.remove(composeKey.modifierMask) }
             // A shortcut (⌘Q, ⌃C…) aborts composing and goes through untouched.
-            if !event.flags.isDisjoint(with: [.maskCommand, .maskControl]) {
+            if !flags.isDisjoint(with: [.maskCommand, .maskControl]) {
                 cancel()
                 return false
             }
@@ -110,7 +135,10 @@ private let escapeKeyCode: Int64 = 53
                 return true
             }
             // Empty for a dead key: nothing to feed, the next key brings the character.
-            for character in NSEvent(cgEvent: event)?.characters ?? "" {
+            let nsEvent = NSEvent(cgEvent: event)
+            // The held Compose key must not alter the character (Right Option + ' is ', not æ).
+            let characters = isComposeKeyHeld ? nsEvent?.charactersIgnoringModifiers : nsEvent?.characters
+            for character in characters ?? "" {
                 feed(character)
                 if !isComposing { break }
             }
