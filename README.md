@@ -50,7 +50,7 @@ xattr -d com.apple.quarantine /Applications/MacCompose.app
 
 Emoji are Compose, Compose, then the emoji's English name or the start of any word in it, then Return or Tab: `wink`, `winking face` or even `wniking` all give 😉, and `joy` gives 😂. GitHub and Slack short names work too: `sob` gives 😭, `+1` gives 👍. Typos are allowed in longer names. If several emoji match, the shortest name wins. If nothing is close, it beeps. To find any sequence, pick "Show sequences…" in the menu and search by result (`é`), name (`arrow`) or keys (`'e`). The list includes your `~/.XCompose` rules.
 
-Escape cancels. A sequence that doesn't exist beeps and is dropped. Holding the Compose key with another key still works as a normal modifier, unless "Compose while held" is on: the Compose key then no longer works as a modifier at all. For example, with Right Option as the Compose key, it no longer types Option characters or does Option+arrow; with Right Command, it no longer triggers shortcuts. Its left twin keeps working.
+Escape, a mouse click or 5 s without a key cancels. A sequence that doesn't exist beeps and is dropped. Holding the Compose key with another key still works as a normal modifier, unless "Compose while held" is on: the Compose key then no longer works as a modifier at all. For example, with Right Option as the Compose key, it no longer types Option characters or does Option+arrow; with Right Command, it no longer triggers shortcuts. Its left twin keeps working.
 
 The menu bar menu has:
 
@@ -129,15 +129,13 @@ The Xorg `en_US.UTF-8` Compose rules, plus the [WinCompose](https://github.com/s
 
 ## Known limits
 
-- Sequences with dead keys (`dead_*`) or keypad keys (`KP_*`) are skipped when loading: 529 of the Xorg rules.
-- `~/.XCompose`: octal and hex escapes in quoted output are not supported, modifier lines (`~Ctrl`, `!`) are skipped, and `$XCOMPOSEFILE` is not read.
+- `KP_*` rules are skipped on purpose: 108 of the Xorg rules. A keypad key types the same character as the main row.
+- Rules with a dead key that has no character mapped (`dead_belowdot`, `dead_dasia`, `dead_horn`, `dead_psili`) are skipped: 240 of the Xorg rules.
+- `~/.XCompose`: modifier lines (`~Ctrl`, `!`) are skipped and logged, and `$XCOMPOSEFILE` is not read.
 - The Compose key is Right Option, Right Command or Right Control. To use Caps Lock, [remap it to Right Control](#use-caps-lock-as-the-compose-key).
-- A dead key pressed while composing is swallowed and types nothing.
-- A mouse click does not cancel composing. Press Escape.
-- If you revoke the Accessibility permission while the app runs, the menu does not warn you.
 - Apple silicon only, macOS 27.2 or later.
 
-Each limit, with the planned fix and the missing features (on-screen feedback, timeout), is in the [backlog](docs/BACKLOG.md).
+Each limit, with the planned fix, is in the [backlog](docs/BACKLOG.md).
 
 ## Uninstall
 
@@ -148,7 +146,7 @@ brew uninstall --cask mac-compose
 ## More
 
 - [Development](docs/DEVELOPMENT.md): build from source and release
-- [Backlog](docs/BACKLOG.md): known limits and missing features
+- [Backlog](docs/BACKLOG.md): known limits
 
 ## License
 
