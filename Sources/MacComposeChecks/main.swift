@@ -124,6 +124,24 @@ emojiResults += "winking".map { engine.feed($0) }
 // Then everything is pending until the last character emits
 check("feed_ofDoubleComposeEmoji_emits", emojiResults.dropLast().allSatisfy { $0 == .pending } && emojiResults.last == .emit("😉"))
 
+// ComposeKeyDetector
+// Given a detector on Right Option (61)
+var detector = ComposeKeyDetector(keyCode: 61)
+// When pressing then releasing it alone, Then it is a tap (on release only)
+check("modifierChanged_ofPressRelease_isTap",
+      !detector.modifierChanged(keyCode: 61, isKeyDown: true) && detector.modifierChanged(keyCode: 61, isKeyDown: false))
+// When a key is pressed while it is held, Then its release is no tap
+_ = detector.modifierChanged(keyCode: 61, isKeyDown: true)
+detector.otherInputPressed()
+check("modifierChanged_whenKeyPressedWhileHeld_isNoTap", !detector.modifierChanged(keyCode: 61, isKeyDown: false))
+// When another modifier changes while it is held, Then its release is no tap
+_ = detector.modifierChanged(keyCode: 61, isKeyDown: true)
+_ = detector.modifierChanged(keyCode: 56, isKeyDown: true)
+check("modifierChanged_whenOtherModifierChangedWhileHeld_isNoTap", !detector.modifierChanged(keyCode: 61, isKeyDown: false))
+// When another modifier is tapped, Then it is no tap
+check("modifierChanged_ofOtherModifier_isNoTap",
+      !detector.modifierChanged(keyCode: 58, isKeyDown: true) && !detector.modifierChanged(keyCode: 58, isKeyDown: false))
+
 if failures > 0 {
     print("\(failures) check(s) failed")
     exit(1)
