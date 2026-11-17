@@ -100,6 +100,19 @@ check("load_ofBundledFiles_composesArrow", bundled[["-", ">"]] == "→")
 check("load_ofBundledFiles_composesDegree", bundled[["o", "o"]] == "°")
 check("load_ofBundledFiles_composesEmoji", bundled[[composeKeyCharacter] + Array("winking")] == "😉")
 
+// Given the bundled sequences, When listing them for display
+let entries = sequenceEntries(bundled)
+let winking = entries.first { $0.output == "😉" }
+// Then the Compose key and spaces are visible and the emoji has its Unicode name
+check("sequenceEntries_ofDoubleComposeEmoji_showsComposeSymbolAndName",
+      winking?.keys == "⎄ ⎄ w i n k i n g" && winking?.name == "winking face")
+check("sequenceEntries_ofSpaceKey_showsVisibleSpace", sequenceEntries([[" ", " "]: "x"]).first?.keys == "⎄ ␣ ␣")
+check("sequenceEntries_isSortedByKeys", entries.map(\.keys) == entries.map(\.keys).sorted())
+// When searching, Then the name, the keys, the output match case-insensitively, and nothing else
+check("matches_ofNameKeysOrOutput_findsEntry",
+      ["winking", "😉", "WINK", ""].allSatisfy { winking?.matches($0) == true } && winking?.matches("zzz") == false)
+check("matches_ofKeysWithoutSeparators_findsEntry", entries.first { $0.output == "é" && $0.matches("'e") } != nil)
+
 // Given an engine on the bundled sequences
 var engine = ComposeEngine(sequences: bundled)
 // When feeding a valid prefix, then completing it

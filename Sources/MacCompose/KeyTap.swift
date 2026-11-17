@@ -64,7 +64,8 @@ private let escapeKeyCode: Int64 = 53
     private var isComposing = false {
         didSet { if isComposing != oldValue { onComposingChanged(isComposing) } }
     }
-    private var engine = ComposeEngine(sequences: loadDefaultComposeSequences())
+    private(set) var sequences = loadDefaultComposeSequences()
+    private lazy var engine = ComposeEngine(sequences: sequences)
     private var detector: ComposeKeyDetector
     /// Keys whose keyDown was swallowed: their keyUp is swallowed too, even once composing is over.
     private var swallowedKeyCodes: Set<Int64> = []
@@ -76,7 +77,8 @@ private let escapeKeyCode: Int64 = 53
     }
 
     func reloadSequences() {
-        engine = ComposeEngine(sequences: loadDefaultComposeSequences())
+        sequences = loadDefaultComposeSequences()
+        engine = ComposeEngine(sequences: sequences)
         cancel()
     }
 

@@ -13,6 +13,7 @@ private let isHoldEnabledKey = "isHoldEnabled"
     private let holdItem = NSMenuItem(title: "Compose while held", action: #selector(toggleHold), keyEquivalent: "")
     private let permissionItem = NSMenuItem(title: "Accessibility permission needed", action: nil, keyEquivalent: "")
     private var composeKeyItems: [NSMenuItem] = []
+    private let sequencesWindow = SequencesWindow()
 
     init(keyTap: KeyTap) {
         self.keyTap = keyTap
@@ -39,6 +40,9 @@ private let isHoldEnabledKey = "isHoldEnabled"
         let reloadItem = NSMenuItem(title: "Reload sequences", action: #selector(reloadSequences), keyEquivalent: "")
         reloadItem.target = self
         menu.addItem(reloadItem)
+        let showItem = NSMenuItem(title: "Show sequences…", action: #selector(showSequences), keyEquivalent: "")
+        showItem.target = self
+        menu.addItem(showItem)
         menu.addItem(.separator())
         let info = Bundle.main.infoDictionary
         let version = info?["CFBundleShortVersionString"] as? String ?? "dev"
@@ -80,6 +84,10 @@ private let isHoldEnabledKey = "isHoldEnabled"
 
     @objc private func reloadSequences() {
         keyTap.reloadSequences()
+    }
+
+    @objc private func showSequences() {
+        sequencesWindow.show(keyTap.sequences)
     }
 
     private func updateItems() {

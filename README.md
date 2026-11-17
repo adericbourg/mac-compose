@@ -48,6 +48,8 @@ xattr -d com.apple.quarantine /Applications/MacCompose.app
 | `o o` | ° |
 | Compose, Compose, then `winking` | 😉 |
 
+Emoji are Compose, Compose, then the emoji's English name, as in the table above. To find any sequence, pick "Show sequences…" in the menu and search by result (`é`), name (`arrow`) or keys (`'e`). The list includes your `~/.XCompose` rules.
+
 Escape cancels. A sequence that doesn't exist beeps and is dropped. Holding the Compose key with another key still works as a normal modifier, unless "Compose while held" is on: the Compose key then no longer works as a modifier at all. For example, with Right Option as the Compose key, it no longer types Option characters or does Option+arrow; with Right Command, it no longer triggers shortcuts. Its left twin keeps working.
 
 The menu bar menu has:
@@ -58,6 +60,7 @@ The menu bar menu has:
 | Compose key | Right Option (default), Right Command or Right Control |
 | Compose while held | Holding the Compose key while typing composes too, like on Linux. Off by default |
 | Reload sequences | Reads `~/.XCompose` again |
+| Show sequences… | Lists every sequence, with a search field |
 | Version | The version and commit you are running. Include them when you report a bug |
 | Quit | Quits the app |
 
