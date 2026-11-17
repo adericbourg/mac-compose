@@ -78,6 +78,7 @@ private let composingTimeout: TimeInterval = 5
     /// Keys whose keyDown was swallowed: their keyUp is swallowed too, even once composing is over.
     private var swallowedKeyCodes: Set<Int64> = []
     private var port: CFMachPort?
+    private var source: CFRunLoopSource?
 
     init(composeKey: ComposeKey) {
         self.composeKey = composeKey
@@ -106,15 +107,29 @@ private let composingTimeout: TimeInterval = 5
             },
             userInfo: Unmanaged.passUnretained(self).toOpaque()
         ) else { return false }
-        CFRunLoopAddSource(CFRunLoopGetMain(), CFMachPortCreateRunLoopSource(nil, port, 0), .commonModes)
+        let source = CFMachPortCreateRunLoopSource(nil, port, 0)
+        CFRunLoopAddSource(CFRunLoopGetMain(), source, .commonModes)
         self.port = port
+        self.source = source
         return true
+    }
+
+    /// Drops the event tap, e.g. once Accessibility is revoked.
+    func stop() {
+        guard let port else { return }
+        CGEvent.tapEnable(tap: port, enable: false)
+        if let source { CFRunLoopRemoveSource(CFRunLoopGetMain(), source, .commonModes) }
+        CFMachPortInvalidate(port)
+        self.port = nil
+        source = nil
+        cancel()
     }
 
     /// True when the event must be swallowed.
     private func handle(_ type: CGEventType, _ event: CGEvent) -> Bool {
         if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
-            if let port { CGEvent.tapEnable(tap: port, enable: true) }
+            // Once Accessibility is revoked the tap stays off: the main timer drops it.
+            if let port, AXIsProcessTrusted() { CGEvent.tapEnable(tap: port, enable: true) }
             return false
         }
         guard isEnabled, event.getIntegerValueField(.eventSourceUserData) != syntheticEventMarker else { return false }

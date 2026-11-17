@@ -12,12 +12,6 @@ Not a bug: `include "%L"` in `~/.XCompose` is ignored on purpose. The bundled ru
 - **Where:** `Sources/MacCompose/KeyTap.swift` (`handle`, `.keyDown` case: `characters` is empty for a dead key).
 - **Fix:** depends on item 1, and on knowing which `dead_*` a key is (it varies by layout). Check feasibility first.
 
-### 4. Revoked Accessibility is not detected (S)
-
-- **Problem:** after revoking the permission, the app looks active and the menu shows no warning.
-- **Where:** `Sources/MacCompose/main.swift` (the permission is only polled until first granted), `Sources/MacCompose/KeyTap.swift` (`handle` re-enables a disabled tap without checking).
-- **Fix:** poll `AXIsProcessTrusted()` every second. Set `isPermissionNeeded` when it is false, and drop and recreate the tap when it becomes true again.
-
 ### 5. Output typed with virtual key 0 may break in some apps (S to verify, M to fix)
 
 - **Problem:** an app that reads the key code instead of the event string would type `a`. Terminals are to verify.

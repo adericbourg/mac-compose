@@ -130,13 +130,15 @@ let statusMenu = StatusMenu(keyTap: keyTap)
 
 _ = AXIsProcessTrustedWithOptions([kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary)
 statusMenu.isPermissionNeeded = !keyTap.start()
-if statusMenu.isPermissionNeeded {
-    // The tap can only be created once Accessibility is granted.
-    Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { timer in
-        let isStarted = MainActor.assumeIsolated { keyTap.start() }
-        guard isStarted else { return }
-        timer.invalidate()
-        MainActor.assumeIsolated { statusMenu.isPermissionNeeded = false }
+// Runs for the whole app life: Accessibility can be granted late and revoked at any time.
+Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+    MainActor.assumeIsolated {
+        if AXIsProcessTrusted() {
+            statusMenu.isPermissionNeeded = !keyTap.start()
+        } else {
+            keyTap.stop()
+            statusMenu.isPermissionNeeded = true
+        }
     }
 }
 
