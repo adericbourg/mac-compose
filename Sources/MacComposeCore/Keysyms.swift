@@ -1,12 +1,19 @@
 import Foundation
 
-/// Character typed by a keysym name (`eacute`, `U2192`), or nil for keys without one (`dead_*`, `KP_*`, arrows...).
+/// Character typed by a keysym name (`eacute`, `U2192`), or nil for keys without one (other `dead_*`, arrows...).
+/// `KP_*` is skipped on purpose: a keypad key types the same character as the main row, so it can't be told apart.
 public func keysymCharacter(named name: String) -> Character? {
     if name.count > 1, name.hasPrefix("U"), let value = UInt32(name.dropFirst(), radix: 16) {
         return Unicode.Scalar(value).map(Character.init)
     }
-    return keysymTable[name]
+    return deadKeyTable[name] ?? keysymTable[name]
 }
+
+private let deadKeyTable: [String: Character] = [
+    "dead_grave": "`", "dead_acute": "´", "dead_circumflex": "^", "dead_tilde": "~", "dead_perispomeni": "~",
+    "dead_macron": "¯", "dead_breve": "˘", "dead_abovedot": "˙", "dead_diaeresis": "¨", "dead_abovering": "˚",
+    "dead_doubleacute": "˝", "dead_caron": "ˇ", "dead_cedilla": "¸", "dead_ogonek": "˛",
+]
 
 private let keysymTable: [String: Character] = {
     guard let url = bundledResource("keysymdef.h"), let text = try? String(contentsOf: url, encoding: .utf8) else {

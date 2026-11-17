@@ -6,12 +6,6 @@ Not a bug: `include "%L"` in `~/.XCompose` is ignored on purpose. The bundled ru
 
 ## Limits
 
-### 1. Dead-key and keypad sequences are dropped (M)
-
-- **Problem:** 529 Xorg rules (for example `<Multi_key> <dead_acute> <e>`) never load, so they do nothing.
-- **Where:** `Sources/MacComposeCore/ComposeFile.swift` (`parseRule`), `Sources/MacComposeCore/Keysyms.swift` (`keysymCharacter`).
-- **Fix:** map `dead_*` to their spacing character (`dead_acute` to `´`). `KP_*` needs the key code, because a keypad key types the same character as the main row: decide whether it is worth it.
-
 ### 2. Dead keys pressed while composing type nothing (M)
 
 - **Problem:** on layouts with dead keys (French, Spanish...), pressing one while composing is swallowed. The user sees no reaction.

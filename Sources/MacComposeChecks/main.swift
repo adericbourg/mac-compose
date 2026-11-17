@@ -22,7 +22,15 @@ check("keysymCharacter_ofUnicodeName_returnsCharacter", keysymCharacter(named: "
 check("keysymCharacter_ofDeprecatedLatin1Alias_returnsCharacter", keysymCharacter(named: "quoteright") == "'")
 check("keysymCharacter_ofParenthesizedUnicodeComment_returnsCharacter", keysymCharacter(named: "leftcaret") == "<")
 check("keysymCharacter_ofNonCharacterKeys_returnsNil",
-      ["dead_acute", "KP_Space", "Left", "F1", "Multi_key"].allSatisfy { keysymCharacter(named: $0) == nil })
+      ["dead_iota", "KP_Space", "Left", "F1", "Multi_key"].allSatisfy { keysymCharacter(named: $0) == nil })
+check("keysymCharacter_ofDeadKeys_returnsSpacingCharacter",
+      keysymCharacter(named: "dead_acute") == "´" && keysymCharacter(named: "dead_circumflex") == "^"
+      && keysymCharacter(named: "dead_diaeresis") == "¨" && keysymCharacter(named: "dead_grave") == "`"
+      && keysymCharacter(named: "dead_tilde") == "~")
+let defaultSequences = loadDefaultComposeSequences()
+check("loadDefaultComposeSequences_ofDeadKeyRules_loadsThemWithoutBreakingMainRowOnes",
+      defaultSequences[["´", "e"]] == "é" && defaultSequences[["'", "e"]] == "é"
+      && defaultSequences[["^", "e"]] == "ê")
 
 // loadComposeSequences
 let fixtureDirectory = FileManager.default.temporaryDirectory.appending(path: "MacComposeChecks-\(UUID())")
