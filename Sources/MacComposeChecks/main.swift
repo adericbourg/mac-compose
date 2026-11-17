@@ -100,6 +100,30 @@ check("load_ofBundledFiles_composesArrow", bundled[["-", ">"]] == "→")
 check("load_ofBundledFiles_composesDegree", bundled[["o", "o"]] == "°")
 check("load_ofBundledFiles_composesEmoji", bundled[[composeKeyCharacter] + Array("winking")] == "😉")
 
+// Given an engine on the bundled sequences
+var engine = ComposeEngine(sequences: bundled)
+// When feeding a valid prefix, then completing it
+let pending = engine.feed("'")
+let emitted = engine.feed("e")
+// Then it is pending, then emits the character
+check("feed_ofPrefix_isPendingThenEmits", pending == .pending && emitted == .emit("é"))
+// When feeding an unknown character after a prefix, then a full sequence
+_ = engine.feed("'")
+let invalid = engine.feed("\u{1}")
+let afterInvalid = engine.feed("-") == .pending && engine.feed(">") == .emit("→")
+// Then it is invalid, and the buffer was reset
+check("feed_ofUnknownCharacter_isInvalidAndResets", invalid == .invalid && afterInvalid)
+// When resetting mid-sequence, then typing a full sequence
+_ = engine.feed("'")
+engine.reset()
+// Then the abandoned prefix is forgotten
+check("reset_forgetsBuffer_thenEmits", engine.feed("o") == .pending && engine.feed("o") == .emit("°"))
+// When feeding the second Compose press (the first one started composing) then the emoji name
+var emojiResults = [engine.feed(composeKeyCharacter)]
+emojiResults += "winking".map { engine.feed($0) }
+// Then everything is pending until the last character emits
+check("feed_ofDoubleComposeEmoji_emits", emojiResults.dropLast().allSatisfy { $0 == .pending } && emojiResults.last == .emit("😉"))
+
 if failures > 0 {
     print("\(failures) check(s) failed")
     exit(1)
