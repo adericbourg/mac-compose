@@ -27,7 +27,7 @@ The event tap needs the Accessibility permission, so no automated check covers i
 
 1. `swift run MacComposeChecks` passes.
 2. `./scripts/bundle.sh && open build/MacCompose.app`, then grant Accessibility.
-3. In TextEdit: Compose, `'`, `e` gives `é`; `-`, `>` gives `→`; `o`, `o` gives `°`; Compose, Compose, `wink`, Return gives `😉`.
+3. In TextEdit: Compose, `'`, `e` gives `é`; `-`, `>` gives `→`; `o`, `o` gives `°`; Compose, Compose, `wink`, Return gives `😉`; Compose, Compose, `sob` gives `😭` with no Return; Compose, Compose, `joy` gives `😂` after a 1 s pause.
 4. With "Compose while held" off, Right Option held with `e` still types the normal Option character.
 5. Pick Right Command in the menu, then repeat step 3.
 6. Add `<Multi_key> <x> <x> : "✗"` to `~/.XCompose`, pick "Reload sequences", then type Compose, `x`, `x`.

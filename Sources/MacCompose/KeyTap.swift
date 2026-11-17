@@ -45,6 +45,8 @@ private let syntheticEventMarker: Int64 = 0x4D_43_4F_4D // "MCOM"
 private let escapeKeyCode: Int64 = 53
 /// Composing is cancelled after this long without a key, so a Compose tap by mistake doesn't keep swallowing keys.
 private let composingTimeout: TimeInterval = 5
+/// An emoji name is done after this long without a key.
+private let namePause: TimeInterval = 1
 
 /// Watches the keyboard: a Compose key tap starts composing, the keys typed next are swallowed and fed to the engine,
 /// and the composed text is typed in their place.
@@ -181,7 +183,10 @@ private let composingTimeout: TimeInterval = 5
     }
 
     private func feed(_ character: Character) {
-        let result = engine.feed(character)
+        apply(engine.feed(character))
+    }
+
+    private func apply(_ result: ComposeEngine.Result) {
         onTypedChanged(engine.typed)
         switch result {
         case .pending:
@@ -197,8 +202,11 @@ private let composingTimeout: TimeInterval = 5
 
     private func restartTimeout() {
         timeoutTimer?.invalidate()
-        timeoutTimer = Timer.scheduledTimer(withTimeInterval: composingTimeout, repeats: false) { [weak self] _ in
-            MainActor.assumeIsolated { self?.cancel() }
+        timeoutTimer = Timer.scheduledTimer(withTimeInterval: engine.isTypingName ? namePause : composingTimeout, repeats: false) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self else { return }
+                if self.engine.isTypingName, let result = self.engine.finishName() { self.apply(result) } else { self.cancel() }
+            }
         }
     }
 

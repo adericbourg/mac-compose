@@ -46,9 +46,9 @@ xattr -d com.apple.quarantine /Applications/MacCompose.app
 | `' e` | é |
 | `- >` | → |
 | `o o` | ° |
-| Compose, Compose, then `wink` and Return | 😉 |
+| Compose, Compose, then `sob` | 😭 |
 
-Emoji are Compose, Compose, then the emoji's English name or the start of any word in it, then Return or Tab: `wink`, `winking face` or even `wniking` all give 😉, and `joy` gives 😂. GitHub and Slack short names work too: `sob` gives 😭, `+1` gives 👍. Typos are allowed in longer names. If several emoji match, the shortest name wins. If nothing is close, it beeps. To find any sequence, pick "Show sequences…" in the menu and search by result (`é`), name (`arrow`) or keys (`'e`). The list includes your `~/.XCompose` rules.
+Emoji are Compose, Compose, then the emoji's English name or the start of any word in it. The emoji comes as soon as no other name starts with what you typed (`sob` gives 😭 right away), otherwise after a 1 s pause, or right away on Return or Tab: `wink`, `winking face` or even `wniking` all give 😉, and `joy` gives 😂. GitHub and Slack short names work too: `sob` gives 😭, `+1` gives 👍. Typos are allowed in longer names. If several emoji match, the shortest name wins. If nothing is close, it beeps. To find any sequence, pick "Show sequences…" in the menu and search by result (`é`), name (`arrow`) or keys (`'e`). The list includes your `~/.XCompose` rules.
 
 Escape, a mouse click or 5 s without a key cancels. A sequence that doesn't exist beeps and is dropped. Holding the Compose key with another key still works as a normal modifier, unless "Compose while held" is on: the Compose key then no longer works as a modifier at all. For example, with Right Option as the Compose key, it no longer types Option characters or does Option+arrow; with Right Command, it no longer triggers shortcuts. Its left twin keeps working.
 

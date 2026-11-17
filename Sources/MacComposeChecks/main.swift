@@ -192,6 +192,21 @@ check("feed_ofDoubleComposeFreeText_emitsOnTab", ([composeKeyCharacter] + Array(
 check("feed_ofDoubleComposeUnknownName_isInvalid", ([composeKeyCharacter] + Array("xqzz\r")).map { engine.feed($0) }.last == .invalid)
 // When typing an exact double Compose rule, Then it still emits right away
 check("feed_ofDoubleComposeRule_emitsRightAway", ([composeKeyCharacter] + Array("bzh")).map { engine.feed($0) }.last.map { $0 != .pending && $0 != .invalid } == true)
+// When typing a name no other name continues, Then it emits without Return
+check("feed_ofDoubleComposeUnambiguousName_emitsWithoutReturn",
+      ([composeKeyCharacter] + Array("sob")).map { engine.feed($0) } == [.pending, .pending, .pending, .emit("😭")])
+// When typing a name another name continues (joy, joystick), Then it waits, and finishing it emits the best match
+let ambiguous = ([composeKeyCharacter] + Array("joy")).map { engine.feed($0) }
+check("feed_ofDoubleComposeAmbiguousName_staysPending", ambiguous.allSatisfy { $0 == .pending } && engine.isTypingName)
+check("finishName_ofPendingName_emitsBestMatch", engine.finishName() == .emit("😂") && engine.typed.isEmpty)
+// When not typing a name (nothing, or the second Compose alone), Then there is nothing to finish
+let finishedNothing = engine.finishName()
+_ = engine.feed(composeKeyCharacter)
+check("finishName_whenNotTypingName_returnsNil", finishedNothing == nil && engine.finishName() == nil)
+// When typing the start of a double Compose rule (bzh), Then it is not a name, so no short pause ends it
+_ = engine.feed("b")
+check("isTypingName_ofDoubleComposeRulePrefix_isFalse", !engine.isTypingName)
+engine.reset()
 // When free text gets longer than any name, Then it gives up
 let runaway = ([composeKeyCharacter] + Array(repeating: "x", count: 100)).map { engine.feed($0) }
 check("feed_ofRunawayFreeText_isInvalid", runaway.contains(.invalid))
