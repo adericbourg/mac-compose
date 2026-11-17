@@ -31,6 +31,7 @@ private final class Search: ObservableObject {
 private struct SequencesView: View {
     let entries: [SequenceEntry]
     @StateObject private var search = Search()
+    @FocusState private var isSearchFocused: Bool
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -45,5 +46,7 @@ private struct SequencesView: View {
                 .padding([.horizontal, .bottom])
         }
         .searchable(text: $search.query, placement: .toolbar, prompt: "Search sequences")
+        .searchFocused($isSearchFocused)
+        .onAppear { isSearchFocused = true }
     }
 }

@@ -39,7 +39,8 @@ The event tap needs the Accessibility permission, so no automated check covers i
 12. In System Settings, revoke Accessibility: the menu shows "Accessibility permission needed" and keys are no longer swallowed. Grant it again: composing works without a restart.
 13. "Launch at login" is ticked on the first launch. Untick it and relaunch: it stays unticked. Tick it, log out and in: the app starts.
 14. Compose output types correctly in Terminal, iTerm2, a VM and a remote desktop client. The app posts output with virtual key 0, so an app that reads key codes would type `a`.
-15. An output of 40 UTF-16 units or more (a long ZWJ emoji sequence, or a test rule in `~/.XCompose`) arrives whole in a text field. The app types output in chunks of 20 units, an observed and undocumented limit. Run this on each new macOS version.
+15. Open "Compose sequences" from the menu and type without clicking: the text goes into the search field. Close the window, bring another app to the front, reopen it and type again.
+16. An output of 40 UTF-16 units or more (a long ZWJ emoji sequence, or a test rule in `~/.XCompose`) arrives whole in a text field. The app types output in chunks of 20 units, an observed and undocumented limit. Run this on each new macOS version.
 
 ## Releasing
 
