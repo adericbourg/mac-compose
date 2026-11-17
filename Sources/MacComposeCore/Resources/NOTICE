@@ -1,0 +1,16 @@
+Compose
+  Source:  https://gitlab.freedesktop.org/xorg/lib/libx11/-/raw/master/nls/en_US.UTF-8/Compose.pre
+  License: MIT-style (X11 / libX11, full text in libX11-COPYING)
+  Modified: XCOMM and C-style comments converted to '#' comments (libX11's build runs the file through cpp to strip them).
+
+keysymdef.h
+  Source:  https://gitlab.freedesktop.org/xorg/proto/xorgproto/-/raw/master/include/X11/keysymdef.h
+  License: MIT-style (The Open Group / X Consortium, notice in the file header)
+
+WinCompose.txt
+  Source:  https://raw.githubusercontent.com/samhocevar/wincompose/master/src/wincompose/rules/WinCompose.txt
+  License: WTFPL
+
+Emoji.txt
+  Source:  https://raw.githubusercontent.com/samhocevar/wincompose/master/src/wincompose/rules/Emoji.txt
+  License: WTFPL
