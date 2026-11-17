@@ -48,7 +48,7 @@ xattr -d com.apple.quarantine /Applications/MacCompose.app
 | `o o` | ° |
 | Compose, Compose, then `wink` and Return | 😉 |
 
-Emoji are Compose, Compose, then the emoji's English name or the start of any word in it, then Return or Tab: `wink`, `winking face` or even `wniking` all give 😉, and `joy` gives 😂. Typos are allowed in longer names. If several emoji match, the shortest name wins. If nothing is close, it beeps. To find any sequence, pick "Show sequences…" in the menu and search by result (`é`), name (`arrow`) or keys (`'e`). The list includes your `~/.XCompose` rules.
+Emoji are Compose, Compose, then the emoji's English name or the start of any word in it, then Return or Tab: `wink`, `winking face` or even `wniking` all give 😉, and `joy` gives 😂. GitHub and Slack short names work too: `sob` gives 😭, `+1` gives 👍. Typos are allowed in longer names. If several emoji match, the shortest name wins. If nothing is close, it beeps. To find any sequence, pick "Show sequences…" in the menu and search by result (`é`), name (`arrow`) or keys (`'e`). The list includes your `~/.XCompose` rules.
 
 Escape cancels. A sequence that doesn't exist beeps and is dropped. Holding the Compose key with another key still works as a normal modifier, unless "Compose while held" is on: the Compose key then no longer works as a modifier at all. For example, with Right Option as the Compose key, it no longer types Option characters or does Option+arrow; with Right Command, it no longer triggers shortcuts. Its left twin keeps working.
 
@@ -79,7 +79,7 @@ Then pick "Reload sequences" in the menu.
 
 ## Default sequences
 
-The Xorg `en_US.UTF-8` Compose rules, plus the [WinCompose](https://github.com/samhocevar/wincompose) rules and emoji. Sources and licenses are in [NOTICE](Sources/MacComposeCore/Resources/NOTICE).
+The Xorg `en_US.UTF-8` Compose rules, plus the [WinCompose](https://github.com/samhocevar/wincompose) rules and emoji, and the [gemoji](https://github.com/github/gemoji) short names. Sources and licenses are in [NOTICE](Sources/MacComposeCore/Resources/NOTICE).
 
 ## Known limits
 

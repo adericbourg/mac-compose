@@ -11,7 +11,7 @@ func check(_ name: String, _ isOK: Bool) {
 }
 
 // bundledResource
-for name in ["Compose", "keysymdef.h", "WinCompose.txt", "Emoji.txt"] {
+for name in ["Compose", "keysymdef.h", "WinCompose.txt", "Emoji.txt", "gemoji.json"] {
     let size = bundledResource(name).flatMap { try? Data(contentsOf: $0).count } ?? 0
     check("bundledResource_of\(name)_returnsNonEmptyFile", size > 0)
 }
@@ -112,8 +112,19 @@ let fixtureNames = loadEmojiNames(from: emojiFixture)
 check("loadEmojiNames_ofActiveAndCommentedLines_returnsBoth",
       fixtureNames.map(\.emoji) == ["😉", "#️⃣"] && fixtureNames.map(\.name) == ["winking face", "keycap: #"])
 
+// Given a gemoji file with several aliases
+let aliasFixture = fixture("gemoji.json", """
+[{"emoji": "👌", "description": "OK hand", "aliases": ["ok_hand", "okay"], "tags": ["fine"]}]
+""")
+// When loading its aliases, Then each alias is a name, with spaces instead of underscores, and tags are left out
+let fixtureAliases = loadEmojiAliases(from: aliasFixture)
+check("loadEmojiAliases_ofEntry_returnsOneNamePerAliasWithSpaces",
+      fixtureAliases.map(\.name) == ["ok hand", "okay"] && fixtureAliases.allSatisfy { $0.emoji == "👌" })
+
 // Given the bundled emoji names
 let emojiNames = loadDefaultEmojiNames()
+check("bestEmoji_ofShortAlias_returnsEmoji",
+      ["sob": "😭", "+1": "👍", "tada": "🎉", "100": "💯"].allSatisfy { bestEmoji(for: $0.key, in: emojiNames) == $0.value })
 check("loadDefaultEmojiNames_returnsAllEmojiLines", emojiNames.count > 3000)
 // When searching, Then prefixes, typos, full names and later words find the closest, shortest name
 check("bestEmoji_ofPrefixTypoFullNameOrUppercase_returnsWinking",

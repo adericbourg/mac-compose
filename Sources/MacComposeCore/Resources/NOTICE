@@ -14,3 +14,7 @@ WinCompose.txt
 Emoji.txt
   Source:  https://raw.githubusercontent.com/samhocevar/wincompose/master/src/wincompose/rules/Emoji.txt
   License: WTFPL
+
+gemoji.json
+  Source:  https://raw.githubusercontent.com/github/gemoji/master/db/emoji.json
+  License: MIT (full text in gemoji-LICENSE)

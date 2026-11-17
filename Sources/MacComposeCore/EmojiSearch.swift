@@ -7,7 +7,7 @@ public struct EmojiName: Sendable {
 }
 
 public func loadDefaultEmojiNames() -> [EmojiName] {
-    bundledResource("Emoji.txt").map(loadEmojiNames) ?? []
+    (bundledResource("Emoji.txt").map(loadEmojiNames) ?? []) + (bundledResource("gemoji.json").map(loadEmojiAliases) ?? [])
 }
 
 /// Every line of a WinCompose emoji file, commented out or not: `... "😉" U1F609 # winking face`.
@@ -21,6 +21,20 @@ public func loadEmojiNames(from url: URL) -> [EmojiName] {
             return nil
         }
         return EmojiName(name: line[hash.upperBound...].trimmingCharacters(in: .whitespaces).lowercased(), emoji: String(parts[1]))
+    }
+}
+
+/// One name per gemoji alias (`sob`, `+1`, `ok_hand`), with underscores as spaces so each word can be searched.
+public func loadEmojiAliases(from url: URL) -> [EmojiName] {
+    struct Entry: Decodable {
+        let emoji: String
+        let aliases: [String]
+    }
+    guard let data = try? Data(contentsOf: url), let entries = try? JSONDecoder().decode([Entry].self, from: data) else {
+        return []
+    }
+    return entries.flatMap { entry in
+        entry.aliases.map { EmojiName(name: $0.replacingOccurrences(of: "_", with: " "), emoji: entry.emoji) }
     }
 }
 

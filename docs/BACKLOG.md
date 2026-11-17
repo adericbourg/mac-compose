@@ -78,13 +78,7 @@ Not a bug: `include "%L"` in `~/.XCompose` is ignored on purpose. The bundled ru
 - **Where:** `Casks/` in `adericbourg/homebrew-tap`.
 - **Fix:** run the Release workflow once.
 
-### 13. Emoji are found by their Unicode name only (S)
-
-- **Problem:** common short names find nothing or the wrong emoji: `100` (named "hundred points"), `ok`, `tada` (gives 🎋, not 🎉), `+1`.
-- **Where:** `Sources/MacComposeCore/EmojiSearch.swift` (`loadEmojiNames`, `bestEmoji`).
-- **Fix:** bundle a keyword list, for example gemoji (MIT) or the CLDR annotations, add it to `NOTICE`, and search the keywords along with the names.
-
-### 14. No Backspace while typing an emoji name (S)
+### 13. No Backspace while typing an emoji name (S)
 
 - **Problem:** after Compose, Compose, Backspace becomes part of the name, so the search usually fails. Typos are tolerated, but the user can't fix one.
 - **Where:** `Sources/MacComposeCore/ComposeEngine.swift` (`feed`).
