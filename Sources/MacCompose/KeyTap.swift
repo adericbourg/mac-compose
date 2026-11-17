@@ -150,6 +150,7 @@ private let escapeKeyCode: Int64 = 53
             return swallowedKeyCodes.remove(keyCode) != nil
         default:
             detector.otherInputPressed()
+            if isComposing { cancel() }
             return false
         }
     }

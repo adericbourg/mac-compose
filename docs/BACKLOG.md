@@ -18,12 +18,6 @@ Not a bug: `include "%L"` in `~/.XCompose` is ignored on purpose. The bundled ru
 - **Where:** `Sources/MacCompose/KeyTap.swift` (`handle`, `.keyDown` case: `characters` is empty for a dead key).
 - **Fix:** depends on item 1, and on knowing which `dead_*` a key is (it varies by layout). Check feasibility first.
 
-### 3. Mouse click does not cancel composing (S)
-
-- **Problem:** the user clicks elsewhere, then types: the keys are still swallowed and fed to the engine.
-- **Where:** `Sources/MacCompose/KeyTap.swift` (`handle`, `default` case only calls `detector.otherInputPressed()`).
-- **Fix:** call `cancel()` in the `default` case when `isComposing`.
-
 ### 4. Revoked Accessibility is not detected (S)
 
 - **Problem:** after revoking the permission, the app looks active and the menu shows no warning.
