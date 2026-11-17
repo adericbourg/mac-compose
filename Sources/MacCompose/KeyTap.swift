@@ -42,6 +42,8 @@ enum ComposeKey: Int64, CaseIterable {
 /// Marks the events this app posts, so its own tap lets them through.
 private let syntheticEventMarker: Int64 = 0x4D_43_4F_4D // "MCOM"
 private let escapeKeyCode: Int64 = 53
+/// Composing is cancelled after this long without a key, so a Compose tap by mistake doesn't keep swallowing keys.
+private let composingTimeout: TimeInterval = 5
 
 /// Watches the keyboard: a Compose key tap starts composing, the keys typed next are swallowed and fed to the engine,
 /// and the composed text is typed in their place.
@@ -62,8 +64,13 @@ private let escapeKeyCode: Int64 = 53
     var onComposingChanged: (Bool) -> Void = { _ in }
 
     private var isComposing = false {
-        didSet { if isComposing != oldValue { onComposingChanged(isComposing) } }
+        didSet {
+            guard isComposing != oldValue else { return }
+            onComposingChanged(isComposing)
+            if isComposing { restartTimeout() } else { timeoutTimer?.invalidate() }
+        }
     }
+    private var timeoutTimer: Timer?
     private(set) var sequences = loadDefaultComposeSequences()
     let emoji = loadDefaultEmojiNames()
     private lazy var engine = ComposeEngine(sequences: sequences, emoji: emoji)
@@ -158,13 +165,20 @@ private let escapeKeyCode: Int64 = 53
     private func feed(_ character: Character) {
         switch engine.feed(character) {
         case .pending:
-            break
+            restartTimeout()
         case .emit(let text):
             isComposing = false
             type(text)
         case .invalid:
             isComposing = false
             NSSound.beep()
+        }
+    }
+
+    private func restartTimeout() {
+        timeoutTimer?.invalidate()
+        timeoutTimer = Timer.scheduledTimer(withTimeInterval: composingTimeout, repeats: false) { [weak self] _ in
+            MainActor.assumeIsolated { self?.cancel() }
         }
     }
 

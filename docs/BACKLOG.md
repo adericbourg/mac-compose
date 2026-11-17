@@ -82,9 +82,3 @@ Compared with WinCompose.
 - **Problem:** the user cannot see what was typed so far. Only the menu bar icon changes. Emoji names make this worse: the result of a fuzzy match is only seen once it's typed.
 - **Where:** `Sources/MacCompose/KeyTap.swift` (`feed`), `Sources/MacCompose/main.swift` (status item).
 - **Fix:** show the typed keys as the menu bar item title, for example `' …`. A floating window near the caret is larger and needs more permissions.
-
-### 3. No composing timeout (S)
-
-- **Problem:** the user taps Compose by mistake and the next keys are swallowed until Escape.
-- **Where:** `Sources/MacCompose/KeyTap.swift` (`isComposing`, `cancel`).
-- **Fix:** cancel composing after a delay of 5 s without a key (a `Timer` restarted in `feed`). Make it a constant, not a setting.
