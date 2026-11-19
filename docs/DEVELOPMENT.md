@@ -50,6 +50,10 @@ Apple silicon only. `./scripts/archive.sh` builds the bundle and zips it into `b
 
 The Nightly workflow builds `main` every day at 03:00 UTC, or when started from the Actions tab. If `main` hasn't moved since the last nightly, it stops there. Otherwise it runs the checks, builds and signs the zip as a release does, and publishes it as the pre-release `nightly-<YYYY-MM-DD>`. The bundle's `CFBundleShortVersionString` is that tag, so the menu shows `Version nightly-<YYYY-MM-DD> (<commit>)`; the version in `Support/Info.plist` on `main` doesn't change. A second run on the same day replaces that day's nightly. It then sets `version` and `sha256` in `Casks/mac-compose-nightly.rb` of the tap, and only after that deletes the previous `nightly-*` releases and their tags.
 
+### Upstream resources
+
+The Upstream resources workflow runs on the 1st of each month at 04:23 UTC, or when started from the Actions tab. It downloads every file listed with a `Source:` in `Sources/MacComposeCore/Resources/NOTICE` (converting `Compose` comments to `#` as described there). If any changed, it pushes them to `feature/upstream-resources` and opens a PR, or refreshes the open one. It needs "Allow GitHub Actions to create and approve pull requests" in the repository's Actions settings. A PR opened with `GITHUB_TOKEN` doesn't trigger the Build workflow: close and reopen it to run the checks. The `License:` lines in NOTICE aren't updated: check them when a license file changes.
+
 ### Signing certificate
 
 Releases are signed with a self-signed certificate (`CN=MacCompose Signing`). TCC then pins the grant to `identifier + certificate leaf` instead of each build's cdhash. Losing the certificate means every user grants the permission once more, so keep the `.p12` and its password in a password manager. The Release workflow imports it from the `SIGNING_CERT_P12` (base64 of the `.p12`) and `SIGNING_CERT_PASSWORD` secrets, and refuses to release an ad-hoc build. To create one (valid 10 years), then use the same `.p12` on your Mac so local builds share the grant:

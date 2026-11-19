@@ -18,3 +18,9 @@ Emoji.txt
 gemoji.json
   Source:  https://raw.githubusercontent.com/github/gemoji/master/db/emoji.json
   License: MIT (full text in gemoji-LICENSE)
+
+libX11-COPYING
+  Source:  https://gitlab.freedesktop.org/xorg/lib/libx11/-/raw/master/COPYING
+
+gemoji-LICENSE
+  Source:  https://raw.githubusercontent.com/github/gemoji/master/LICENSE

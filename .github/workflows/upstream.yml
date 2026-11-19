@@ -1,0 +1,51 @@
+name: Upstream resources
+
+on:
+  schedule:
+    # UTC, 1st of the month; off the hour, since GitHub delays or drops scheduled runs at :00
+    - cron: '23 4 1 * *'
+  workflow_dispatch:
+
+concurrency: upstream
+
+jobs:
+  update:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-slim
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      BRANCH: feature/upstream-resources
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Download the files listed in NOTICE
+        working-directory: Sources/MacComposeCore/Resources
+        run: |
+          awk '/^[^ ]/ { name = $1 } /^  Source:/ { print name, $2 }' NOTICE | while read -r name url; do
+            curl -fsSL "$url" -o "$name"
+          done
+          # Comments to '#', as described in NOTICE (libX11's build strips them with cpp)
+          awk '
+            /^XCOMM/ { sub(/^XCOMM/, "#"); print; next }
+            /^\/\*/ { c = 1 }
+            c { if (/\*\//) c = 0; sub(/^\/\* ?/, ""); sub(/^ \* ?/, ""); sub(/ ?\*\/$/, ""); print "# " $0; next }
+            1
+          ' Compose > "$RUNNER_TEMP/Compose" && mv "$RUNNER_TEMP/Compose" Compose
+      - name: Open or refresh the pull request
+        run: |
+          if git diff --quiet; then echo "Up to date"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$BRANCH"
+          git commit -am "chore: update upstream resources"
+          git push --force origin "$BRANCH"
+          # An open PR just gets its branch refreshed by the push above
+          if [ -z "$(gh pr list --head "$BRANCH" --state open --json number -q '.[].number')" ]; then
+            gh pr create --head "$BRANCH" --title "chore: update upstream resources" \
+              --body "Files that changed upstream since the last update (sources in \`Sources/MacComposeCore/Resources/NOTICE\`):
+          $(git diff --name-only HEAD~1 | sed 's/^/- /')
+
+          Opened by the Upstream resources workflow, so the Build workflow doesn't run: close and reopen this PR to run it. If a license file changed, check the \`License:\` lines in NOTICE."
+          fi
