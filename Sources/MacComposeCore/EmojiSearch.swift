@@ -8,6 +8,7 @@ public struct EmojiName: Sendable {
 
 public func loadDefaultEmojiNames() -> [EmojiName] {
     (bundledResource("Emoji.txt").map(loadEmojiNames) ?? []) + (bundledResource("gemoji.json").map(loadEmojiAliases) ?? [])
+        + (bundledResource("Extra.txt").map(loadEmojiNames) ?? [])
 }
 
 /// Every line of a WinCompose emoji file, commented out or not: `... "😉" U1F609 # winking face`.

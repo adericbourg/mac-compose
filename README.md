@@ -125,7 +125,7 @@ Then pick "Reload sequences" in the menu.
 
 ## Default sequences
 
-The Xorg `en_US.UTF-8` Compose rules, plus the [WinCompose](https://github.com/samhocevar/wincompose) rules and emoji, and the [gemoji](https://github.com/github/gemoji) short names. Sources and licenses are in [NOTICE](Sources/MacComposeCore/Resources/NOTICE).
+The Xorg `en_US.UTF-8` Compose rules, plus the [WinCompose](https://github.com/samhocevar/wincompose) rules and emoji, and the [gemoji](https://github.com/github/gemoji) short names. A few extra names, such as `tflip` for (╯°□°)╯︵ ┻━┻, are in [Extra.txt](Sources/MacComposeCore/Resources/Extra.txt). Sources and licenses are in [NOTICE](Sources/MacComposeCore/Resources/NOTICE).
 
 ## Known limits
 

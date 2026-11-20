@@ -11,7 +11,7 @@ func check(_ name: String, _ isOK: Bool) {
 }
 
 // bundledResource
-for name in ["Compose", "keysymdef.h", "WinCompose.txt", "Emoji.txt", "gemoji.json"] {
+for name in ["Compose", "keysymdef.h", "WinCompose.txt", "Emoji.txt", "gemoji.json", "Extra.txt"] {
     let size = bundledResource(name).flatMap { try? Data(contentsOf: $0).count } ?? 0
     check("bundledResource_of\(name)_returnsNonEmptyFile", size > 0)
 }
@@ -138,6 +138,13 @@ let emojiNames = loadDefaultEmojiNames()
 check("bestEmoji_ofShortAlias_returnsEmoji",
       ["sob": "😭", "+1": "👍", "tada": "🎉", "100": "💯"].allSatisfy { bestEmoji(for: $0.key, in: emojiNames) == $0.value })
 check("loadDefaultEmojiNames_returnsAllEmojiLines", emojiNames.count > 3000)
+let extraNames = bundledResource("Extra.txt").map(loadEmojiNames) ?? []
+for extra in extraNames {
+    check("bestEmoji_ofExtraName_returnsIt_\(extra.name)", bestEmoji(for: extra.name, in: emojiNames) == extra.emoji)
+}
+let extraLines = bundledResource("Extra.txt").flatMap { try? String(contentsOf: $0, encoding: .utf8) }?
+    .split(whereSeparator: \.isNewline).filter { $0.hasPrefix("\"") } ?? []
+check("loadEmojiNames_ofExtra_returnsEveryLine", !extraLines.isEmpty && extraNames.count == extraLines.count)
 // When searching, Then prefixes, typos, full names and later words find the closest, shortest name
 check("bestEmoji_ofPrefixTypoFullNameOrUppercase_returnsWinking",
       ["wink", "wniking", "winking face", "WINK", " wink "].allSatisfy { bestEmoji(for: $0, in: emojiNames) == "😉" })
@@ -194,7 +201,8 @@ check("feed_ofDoubleComposeUnknownName_isInvalid", ([composeKeyCharacter] + Arra
 check("feed_ofDoubleComposeRule_emitsRightAway", ([composeKeyCharacter] + Array("bzh")).map { engine.feed($0) }.last.map { $0 != .pending && $0 != .invalid } == true)
 // When typing a name no other name continues, Then it emits without Return
 check("feed_ofDoubleComposeUnambiguousName_emitsWithoutReturn",
-      ([composeKeyCharacter] + Array("sob")).map { engine.feed($0) } == [.pending, .pending, .pending, .emit("😭")])
+      ([composeKeyCharacter] + Array("sob")).map { engine.feed($0) } == [.pending, .pending, .pending, .emit("😭")]
+      && ([composeKeyCharacter] + Array("tflip")).map { engine.feed($0) }.last == .emit("(╯°□°)╯︵ ┻━┻"))
 // When typing a name another name continues (joy, joystick), Then it waits, and finishing it emits the best match
 let ambiguous = ([composeKeyCharacter] + Array("joy")).map { engine.feed($0) }
 check("feed_ofDoubleComposeAmbiguousName_staysPending", ambiguous.allSatisfy { $0 == .pending } && engine.isTypingName)

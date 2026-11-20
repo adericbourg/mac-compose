@@ -52,7 +52,7 @@ The Nightly workflow builds `main` every day at 03:00 UTC, or when started from 
 
 ### Upstream resources
 
-The Upstream resources workflow runs on the 1st of each month at 04:23 UTC, or when started from the Actions tab. It downloads every file listed with a `Source:` in `Sources/MacComposeCore/Resources/NOTICE` (converting `Compose` comments to `#` as described there). If any changed, it pushes them to `feature/upstream-resources` and opens a PR, or refreshes the open one. It needs "Allow GitHub Actions to create and approve pull requests" in the repository's Actions settings. A PR opened with `GITHUB_TOKEN` doesn't trigger the Build workflow: close and reopen it to run the checks. The `License:` lines in NOTICE aren't updated: check them when a license file changes.
+The Upstream resources workflow runs on the 1st of each month at 04:23 UTC, or when started from the Actions tab. It downloads every file listed with a `Source:` in `Sources/MacComposeCore/Resources/NOTICE` (converting `Compose` comments to `#` as described there). If any changed, it pushes them to `feature/upstream-resources` and opens a PR, or refreshes the open one. It needs "Allow GitHub Actions to create and approve pull requests" in the repository's Actions settings. A PR opened with `GITHUB_TOKEN` doesn't trigger the Build workflow: close and reopen it to run the checks. The `License:` lines in NOTICE aren't updated: check them when a license file changes. `Extra.txt` has no `Source:`: it holds this project's own emoji names, in the `Emoji.txt` format, and the workflow leaves it alone.
 
 ### Signing certificate
 

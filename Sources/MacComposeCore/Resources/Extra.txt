@@ -1,0 +1,17 @@
+# Additions of MacCompose, not mirrored from upstream (not listed in NOTICE).
+"(╯°□°)╯︵ ┻━┻" # tflip
+"( ͡° ͜ʖ ͡°)" # lenny
+"┬─┬ノ( º _ ºノ)" # unflip
+"¯\_(ツ)_/¯" # meh
+"(•_•) ( •_•)>⌐■-■ (⌐■_■)" # shades
+"(⌐■_■)" # dealwit
+"ಠ_ಠ" # lod
+"(◕‿◕)" # happy
+"(ﾉ◕ヮ◕)ﾉ*:・ﾟ✧" # sparkly
+"(╥﹏╥)" # weep
+"(ノಠ益ಠ)ノ彡┻━┻" # ragflip
+"ヽ༼ຈل͜ຈ༽ﾉ" # donger
+"(︶︹︶)" # bummer
+"(・ω・)ノ" # hiya
+"(っ◕‿◕)っ" # hugme
+"ʕ•ᴥ•ʔ" # kuma
