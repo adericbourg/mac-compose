@@ -12,13 +12,7 @@ Not a bug: `include "%L"` in `~/.XCompose` is ignored on purpose. The bundled ru
 - **Where:** `Sources/MacComposeCore/Resources/`.
 - **Fix:** ask the author for a license. Without an answer, tell users to copy the rules into `~/.XCompose`.
 
-### 2. Homebrew cask `mac-compose` holds a placeholder value (S)
-
-- **Problem:** `sha256` is `000...0` in `mac-compose.rb` until a release runs, so `brew install --cask mac-compose` fails. `mac-compose-nightly.rb` has a real one.
-- **Where:** `Casks/` in `adericbourg/homebrew-tap`.
-- **Fix:** run the Release workflow once.
-
-### 3. `KP_*` rules are skipped (M)
+### 2. `KP_*` rules are skipped (M)
 
 - **Problem:** 108 Xorg rules using keypad keys are not loaded. This is on purpose: a keypad key types the same character as the main row, so the app cannot tell them apart.
 - **Where:** `Sources/MacComposeCore/Keysyms.swift`.
