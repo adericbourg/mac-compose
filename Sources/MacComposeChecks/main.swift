@@ -58,6 +58,7 @@ let rules = fixture("rules", #"""
 <dead_acute> <e> : "é"
 <Multi_key> <Left> <e> : "nope"
 <Multi_key> <k> <k> "no colon"
+<Multi_key> <u> <u> : "unterminated
 garbage line
 """#)
 // When loading it
