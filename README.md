@@ -122,7 +122,16 @@ Add rules to `~/.XCompose`, in the X11 format:
 
 Then pick "Reload sequences" in the menu.
 
+For your own names, like the emoji names, start the rule with two `<Multi_key>`, then one `<x>` per character (`<space>` for a space). This one is Compose, Compose, then `shrug`:
+
+```
+<Multi_key> <Multi_key> <s> <h> <r> <u> <g> : "¯\\_(ツ)_/¯"
+```
+
+Write `\"` for a quote and `\\` for a backslash in the result.
+
 - Your rules are loaded after the default ones, and a later rule replaces an earlier one with the same keys.
+- A name you define wins over an emoji name that is the same (`shrug` above no longer gives 🤷). It must be typed exactly: no typos or word starts, unlike emoji names. While what you typed is still the start of one of your names, the 1 s pause doesn't pick an emoji: press Return.
 - `include "%L"` lines are ignored: the default sequences are always loaded first.
 
 ## Default sequences

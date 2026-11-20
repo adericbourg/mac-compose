@@ -223,6 +223,14 @@ let afterBackspace = ([composeKeyCharacter] + Array("wxy\u{7F}\u{7F}\u{7F}\u{7F}
 check("feed_ofBackspaceInFreeText_removesLastCharacter",
       afterBackspace.dropLast().allSatisfy { $0 == .pending } && afterBackspace.last == .emit("😉"))
 
+// Given a user double Compose rule named like a bundled emoji (shrug)
+let shrugRule = fixture("shrug", #"<Multi_key> <Multi_key> <s> <h> <r> <u> <g> : "¯\\_(ツ)_/¯""#)
+var customEngine = ComposeEngine(sequences: loadComposeSequences(from: [shrugRule]), emoji: emojiNames)
+// When typing it, Then the user rule wins; When leaving its prefix (shrimp), Then emoji names still apply
+check("feed_ofCustomDoubleComposeRule_winsOverSameEmojiName",
+      ([composeKeyCharacter] + Array("shrug")).map { customEngine.feed($0) }.last == .emit(#"¯\_(ツ)_/¯"#)
+      && ([composeKeyCharacter] + Array("shrimp")).map { customEngine.feed($0) }.last == .emit("🦐"))
+
 // Given a partial free text, Then `typed` mirrors the engine's buffer, Backspace included, and is empty after emitting
 engine.reset()
 _ = ([composeKeyCharacter] + Array("wix\u{7F}")).map { engine.feed($0) }
