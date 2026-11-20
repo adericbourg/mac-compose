@@ -102,6 +102,15 @@ let included = loadComposeSequences(from: [user])
 check("load_ofIncludeL_skipsInclude", included[["'", "e"]] == nil)
 check("load_ofIncludeL_keepsUserRule", included[["o", "o"]] == "custom")
 
+// Given a user file including another file by path, and a file including itself
+let includedFile = fixture("included", #"<Multi_key> <i> <i> : "included""#)
+let includer = fixture("includer", "include \"\(includedFile.path(percentEncoded: false))\"")
+let cycle = fixtureDirectory.appending(path: "cycle")
+_ = fixture("cycle", "include \"\(cycle.path(percentEncoded: false))\"\n<Multi_key> <y> <y> : \"cycle\"")
+// When loading them, Then the included rule applies, and the cycle stops with its rule loaded
+check("load_ofIncludePath_loadsIncludedRules", loadComposeSequences(from: [includer])[["i", "i"]] == "included")
+check("load_ofIncludeCycle_stopsAndKeepsRules", loadComposeSequences(from: [cycle])[["y", "y"]] == "cycle")
+
 // Given the bundled files, When loading them, Then the well-known sequences are present
 let start = Date()
 let bundled = loadComposeSequences(from: ["Compose", "WinCompose.txt"].compactMap(bundledResource))
