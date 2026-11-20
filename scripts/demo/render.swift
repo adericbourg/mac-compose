@@ -45,7 +45,8 @@ func steps(_ demo: Demo) -> [(Int, Frame)] {
     return steps
 }
 
-func draw(_ f: Frame, _ demo: Demo) -> Data {
+/// A PNG of the background, with whatever `body` draws on it.
+func canvas(_ body: () -> Void) -> Data {
     let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: Int(size), pixelsHigh: Int(size), bitsPerSample: 8,
                                samplesPerPixel: 4, hasAlpha: true, isPlanar: false, colorSpaceName: .deviceRGB,
                                bytesPerRow: 0, bitsPerPixel: 0)!
@@ -53,7 +54,12 @@ func draw(_ f: Frame, _ demo: Demo) -> Data {
     NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
     background.setFill()
     NSRect(x: 0, y: 0, width: size, height: size).fill()
+    body()
+    NSGraphicsContext.restoreGraphicsState()
+    return rep.representation(using: .png, properties: [:])!
+}
 
+func draw(_ f: Frame, _ demo: Demo) -> Data { canvas {
     // Typed output and caret (y grows upwards)
     let baseline: CGFloat = 400
     var typedFont = NSFont.systemFont(ofSize: 150)
@@ -112,16 +118,14 @@ func draw(_ f: Frame, _ demo: Demo) -> Data {
         caption.draw(at: NSPoint(x: rect.midX - s.width / 2, y: rect.midY - s.height / 2))
         keyX += rect.width + gap
     }
-    NSGraphicsContext.restoreGraphicsState()
-    return rep.representation(using: .png, properties: [:])!
-}
+} }
 
-func render(_ demo: Demo) throws {
-    let steps = steps(demo)
+/// The demo's distinct pictures as PNG, each with how long it shows (ms).
+func frames(_ demo: Demo) -> [(Data, Int)] {
     // Sample every 10 ms and keep a frame only when the picture changes.
     var runs: [(Frame, Int)] = []
     var start = 0
-    for (duration, step) in steps {
+    for (duration, step) in steps(demo) {
         for t in stride(from: start, to: start + duration, by: 10) {
             var f = step
             f.isCursorOn = t % 1060 < 530 // macOS caret blink rate
@@ -129,17 +133,20 @@ func render(_ demo: Demo) throws {
         }
         start += duration
     }
+    return runs.map { (draw($0.0, demo), $0.1) }
+}
 
-    let tmp = FileManager.default.temporaryDirectory.appendingPathComponent("demo-\(demo.name)-\(getpid())")
+func write(_ name: String, _ frames: [(Data, Int)]) throws {
+    let tmp = FileManager.default.temporaryDirectory.appendingPathComponent("demo-\(name)-\(getpid())")
     try FileManager.default.createDirectory(at: tmp, withIntermediateDirectories: true)
     defer { try? FileManager.default.removeItem(at: tmp) }
     var args = ["img2webp", "-loop", "0", "-lossless"]
-    for (i, (f, duration)) in runs.enumerated() {
-        let png = tmp.appendingPathComponent("\(i).png")
-        try draw(f, demo).write(to: png)
-        args += ["-d", "\(duration)", png.path]
+    for (i, (png, duration)) in frames.enumerated() {
+        let file = tmp.appendingPathComponent("\(i).png")
+        try png.write(to: file)
+        args += ["-d", "\(duration)", file.path]
     }
-    args += ["-o", "docs/images/demo-\(demo.name).webp"]
+    args += ["-o", "docs/images/demo-\(name).webp"]
 
     let p = Process()
     p.executableURL = URL(fileURLWithPath: "/usr/bin/env")
@@ -150,10 +157,17 @@ func render(_ demo: Demo) throws {
 }
 
 let grin = NSImage(contentsOfFile: "scripts/demo/noto-emoji_u1f601.png")!
-for demo in [
+let demos = [
     Demo(name: "accent", keys: [compose, "'", "e"], output: .text("é")),
     Demo(name: "emoji", keys: [compose, compose, "g", "r", "i", "n"], output: .image(grin), pauseBeforeOutput: 1000),
     Demo(name: "kaomoji", keys: [compose, compose, "t", "f", "l", "i", "p"], output: .text("(╯°□°)╯︵ ┻━┻")),
-] {
-    try render(demo)
+]
+// demo-all chains every demo, each followed by a short blank break.
+let blankBreak = (canvas {}, 500)
+var all: [(Data, Int)] = []
+for demo in demos {
+    let demoFrames = frames(demo)
+    try write(demo.name, demoFrames)
+    all += demoFrames + [blankBreak]
 }
+try write("all", all)
