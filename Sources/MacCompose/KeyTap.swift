@@ -217,14 +217,7 @@ private let namePause: TimeInterval = 1
     }
 
     private func type(_ text: String) {
-        // Receivers keep only the first 20 UTF-16 units of an event's string (observed limit, undocumented): one event per chunk.
-        var chunks: [[UniChar]] = [[]]
-        for character in text {
-            let units = Array(String(character).utf16)
-            if chunks[chunks.count - 1].count + units.count > 20 { chunks.append([]) }
-            chunks[chunks.count - 1] += units
-        }
-        for chunk in chunks {
+        for chunk in utf16Chunks(text) {
             for isKeyDown in [true, false] {
                 guard let event = CGEvent(keyboardEventSource: nil, virtualKey: 0, keyDown: isKeyDown) else { continue }
                 // No modifier: a still-held Shift or Option must not alter the text.

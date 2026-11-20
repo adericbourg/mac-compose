@@ -249,6 +249,16 @@ _ = "\r".map { engine.feed($0) }
 engine.reset()
 check("typed_afterReset_isEmpty", engine.typed.isEmpty)
 
+// utf16Chunks
+// Given 41 one-unit characters, Then they make chunks of 20, 20 and 1
+check("utf16Chunks_ofLongText_splitsEvery20Units", utf16Chunks(String(repeating: "a", count: 41)).map(\.count) == [20, 20, 1])
+// Given an emoji (2 units) across the limit, Then it moves whole to the next chunk
+check("utf16Chunks_ofCharacterAcrossLimit_keepsItWhole",
+      utf16Chunks(String(repeating: "a", count: 19) + "😉").map(\.count) == [19, 2])
+// Given one character over 20 units (e and 25 combining accents), Then it is one chunk, with no empty chunk before it
+check("utf16Chunks_ofCharacterOver20Units_hasNoEmptyChunk",
+      utf16Chunks("e" + String(repeating: "\u{301}", count: 25)).map(\.count) == [26])
+
 // ComposeKeyDetector
 // Given a detector on Right Option (61)
 var detector = ComposeKeyDetector(keyCode: 61)
