@@ -4,6 +4,8 @@ A Compose key for macOS, like the one on Linux and in WinCompose. Tap the Compos
 
 It runs in the menu bar and works in any app.
 
+<p align="center"><img src="docs/images/demo-all.webp" width="400" alt="Animation: Compose then ' e types é; Compose, Compose, grin types 😁; Compose, Compose, tflip types (╯°□°)╯︵ ┻━┻"></p>
+
 ## Install
 
 You need macOS 27.2 or later on Apple silicon.
